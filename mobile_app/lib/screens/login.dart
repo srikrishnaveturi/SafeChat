@@ -1,6 +1,7 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:chat_app/chat/chatClass.dart';
+import 'package:chat_app/security/encryption.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -75,6 +76,7 @@ class LoginScreenState extends State<LoginScreen> {
         final List<DocumentSnapshot> documents = result.docs;
         if (documents.length == 0) {
           // Update data to server if new user
+          var x = await End2EndEncryption.generateKeys();
           FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
             'name': firebaseUser.displayName,
             'id': firebaseUser.uid,
@@ -82,7 +84,8 @@ class LoginScreenState extends State<LoginScreen> {
             'blocked':[],
             'aboutMe':'XYZ',
             'requestSent':[],
-            'requestAccepted':[]
+            'requestAccepted':[],
+            'publicKey':json.encode(x[0])
           });
 
           // Write data to local
@@ -90,6 +93,11 @@ class LoginScreenState extends State<LoginScreen> {
           await prefs?.setString('id', currentUser!.uid);
           await prefs?.setString('name', currentUser!.displayName ?? "");
           await prefs?.setString('blocked', '[]');
+          
+          await prefs?.setString('publicKey', json.encode(x[0]));
+          await prefs?.setString('privateKey', json.encode(x[1]));
+          await prefs?.setStringList('securedConvos', []);
+          await prefs?.setString('AESMap', json.encode({}));
 
         } else {
           DocumentSnapshot documentSnapshot = documents[0];

@@ -1,11 +1,14 @@
 
 import 'package:chat_app/Firebase/firebaseFunction.dart';
+import 'package:chat_app/security/encryption.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
 class Contacts extends StatefulWidget {
   @override
   _ContactsState createState() => _ContactsState();
@@ -15,6 +18,7 @@ class _ContactsState extends State<Contacts> {
   dynamic listOfSnapshots;
   dynamic userMap;
   late dynamic id;
+  
 
   Widget widgetDecision(requestArray,acceptedArray,uid,BuildContext context,index){
     if(listOfSnapshots[index].get('requestSent').contains(userMap.get('id'))){
@@ -126,8 +130,6 @@ class _ContactsState extends State<Contacts> {
                 return ListView.builder(
                     itemCount:listOfSnapshots.length,
                     itemBuilder: (context,index){
-                      print(listOfSnapshots[index].get('blocked'));
-                      print(userMap.get('requestSent'));
                       return Card(
                         shape:RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0)
@@ -162,7 +164,21 @@ class _ContactsState extends State<Contacts> {
                                 List<dynamic> sortList= [pref.getString('id'),listOfSnapshots[index].id];
                                 sortList.sort();
                                 dynamic finalString=sortList[0]+sortList[1];
-                                //Provider.of<FireBaseFunction>(context,listen: false).setSafeMode(finalString);
+
+                                if(!pref.getStringList('securedConvos')!.contains(finalString)){
+                                   var aesKey = await End2EndEncryption.returnAESKey(listOfSnapshots[index].get('publicKey'),json.decode(pref.getString('privateKey')!) );
+                                   var list = pref.getStringList('securedConvos');
+                                   list!.add(finalString);
+                                   pref.setStringList('securedConvos', list);
+                                   var map = json.decode(pref.getString('AESMap')!);
+                                   map[finalString]=aesKey;
+
+                                }
+
+
+                               
+                                
+                               
                                 Navigator.pushNamed(context, '/chatRoom',arguments: {
                                   'chatID':finalString,
                                   'id':pref.getString('id'),
