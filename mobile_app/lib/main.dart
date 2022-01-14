@@ -6,7 +6,6 @@ import 'package:chat_app/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:chat_app/chat/test.dart';
 
 
 void main() async {
@@ -23,7 +22,7 @@ void main() async {
           '/home':(context)=>Contacts(),
           '/login':(context)=>LoginScreen(title: 'Air India'),
           '/chatRoom': (context)=>ChatRoom(),
-          '/test':(context)=>Profile()
+          
         }
     ))
   );

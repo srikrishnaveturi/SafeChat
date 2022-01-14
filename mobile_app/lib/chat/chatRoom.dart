@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/preprocessing/natural_language_processing.dart';
+import 'package:chat_app/security/e2ee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:webcrypto/webcrypto.dart';
 
 class ChatRoom extends StatefulWidget {
   @override
@@ -14,6 +18,7 @@ class _ChatRoomState extends State<ChatRoom> {
   dynamic messages;
   TextEditingController textMessage = TextEditingController();
   dynamic data = {};
+  List<String> decryptedMessages = [];
   late bool blockedStatus;
   bool safeModeStatus = true;
   ScrollController scrollController = new ScrollController();
@@ -25,6 +30,19 @@ class _ChatRoomState extends State<ChatRoom> {
             .onBlockOrUnblock(data['id'], data['peerID'], data['blockedByYou'],
                 context, data['blockedStatus']);
     data['blockedStatus'] = !data['blockedStatus'];
+  }
+
+  Future<bool> fetchDecryptedMessages(
+      List<QueryDocumentSnapshot> encryptedMessages) async {
+        print("LOOOOOOOOOOOOOOOOKKKKKKKKKKK ${data['DerivedBits']}");
+        print(data['DerivedBits'].runtimeType);
+         var aesGcmSecretKey = await AesGcmSecretKey.importRawKey(data['DerivedBits']);
+    for (var msg in encryptedMessages) {
+      decryptedMessages.add(await End2EndEncryption.decryption(
+          aesGcmSecretKey, msg.get('content')));
+    }
+    print('DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+    return true;
   }
 
   @override
@@ -109,8 +127,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         ],
                       );
                     });
-                print(x);
-                print(blockedStatus);
+                
                 Provider.of<FireBaseFunction>(context, listen: false)
                     .getCurrentBlockedStatus(x);
                 blockedStatus =
@@ -201,7 +218,6 @@ class _ChatRoomState extends State<ChatRoom> {
                     .orderBy('timestamp', descending: false)
                     .snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  print(data);
                   if (!snapshot.hasData) {
                     return Center(
                         child: CircularProgressIndicator(
@@ -210,46 +226,59 @@ class _ChatRoomState extends State<ChatRoom> {
                   } else {
                     messages = snapshot.data!.docs;
 
-                    Future.delayed(Duration(milliseconds: 1000),
-                        () => scrollController.position.maxScrollExtent);
-                    return ListView.builder(
-                      itemCount: messages.length,
-                      controller: scrollController,
-                      scrollDirection: Axis.vertical,
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.only(
-                              left: 14, right: 14, top: 10, bottom: 10),
-                          child: Align(
-                            alignment:
-                                (messages[index].get('idFrom') == data['id']
-                                    ? Alignment.topRight
-                                    : Alignment.topLeft),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: (messages[index].get('idFrom') ==
+                    return FutureBuilder(
+                        future: fetchDecryptedMessages(messages),
+                        builder: (context, AsyncSnapshot ss) {
+                          if (ss.hasData) {
+                            print('SSSSSSSSSSSSSSSSSSSSSSSSSSSS $ss');
+                            return ListView.builder(
+                              itemCount: messages.length,
+                              controller: scrollController,
+                              scrollDirection: Axis.vertical,
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  padding: EdgeInsets.only(
+                                      left: 14, right: 14, top: 10, bottom: 10),
+                                  child: Align(
+                                    alignment: (messages[index].get('idFrom') ==
                                             data['id']
-                                        ? Colors.black
-                                        : Colors.green)),
-                              ),
-                              padding: EdgeInsets.all(16),
-                              child: Text(
-                                messages[index].get('content'),
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: (messages[index].get('idFrom') ==
-                                            data['id']
-                                        ? Colors.black
-                                        : Colors.green)),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
+                                        ? Alignment.topRight
+                                        : Alignment.topLeft),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                            color: (messages[index]
+                                                        .get('idFrom') ==
+                                                    data['id']
+                                                ? Colors.black
+                                                : Colors.green)),
+                                      ),
+                                      padding: EdgeInsets.all(16),
+                                      child: Text(
+                                        decryptedMessages[index],
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: (messages[index]
+                                                        .get('idFrom') ==
+                                                    data['id']
+                                                ? Colors.black
+                                                : Colors.green)),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                          else{
+                            return Center(
+                              child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.blueGrey)));
+                          }
+                        });
                   }
                 },
               )),
@@ -296,7 +325,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     width: 15,
                   ),
                   FloatingActionButton(
-                    onPressed: () {
+                    onPressed: () async {
                       print(data['blocked']);
                       if (data['blocked'].contains(data['id'])) {
                         Fluttertoast.showToast(
@@ -328,7 +357,8 @@ class _ChatRoomState extends State<ChatRoom> {
                             Provider.of<FireBaseFunction>(context,
                                     listen: false)
                                 .onSendMessage(
-                                    textMessage.text,
+                                    await End2EndEncryption.encryption(
+                                        data['DerivedBits'], textMessage.text),
                                     data['id'],
                                     data['peerID'],
                                     textMessage,

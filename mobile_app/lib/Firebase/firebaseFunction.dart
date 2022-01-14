@@ -9,6 +9,7 @@ class FireBaseFunction extends ChangeNotifier {
   bool blocked = false;
   Widget widget = Container();
   bool safeMode = true;
+  late Stream<String> decryptedmessages;
 
   get getSafeMode {
     return safeMode;
@@ -126,6 +127,8 @@ class FireBaseFunction extends ChangeNotifier {
         .doc(uid)
         .update({'requestSent': requestArray});
   }
+
+  
 
   widgetDecider(requestArray, acceptedArray, uid, BuildContext context, index,
       uMap, list) {

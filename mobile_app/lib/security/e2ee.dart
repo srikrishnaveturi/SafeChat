@@ -17,8 +17,7 @@ class End2EndEncryption {
     return [publicKeyJwk, privateKeyJwk];
   }
 
-  static Future<AesGcmSecretKey> returnAESKey(
-      Map<String, dynamic> peerPublicKey,
+  static Future<Uint8List> returnDerivedBits(Map<String, dynamic> peerPublicKey,
       Map<String, dynamic> privateKeyJwk) async {
     EcdhPublicKey ecdhPublicKey =
         await EcdhPublicKey.importJsonWebKey(peerPublicKey, EllipticCurve.p256);
@@ -28,20 +27,31 @@ class End2EndEncryption {
 
     Uint8List derivedBits = await ecdhPrivateKey.deriveBits(256, ecdhPublicKey);
 
-    var aesGcmSecretKey = await AesGcmSecretKey.importRawKey(derivedBits);
-
-    return aesGcmSecretKey;
+    return derivedBits;
   }
 
   static Future<String> encryption(
-      AesGcmSecretKey aesGcmSecretKey, String message) async {
+      List<int> derivedBits, String message) async {
     List<int> list = message.codeUnits;
     Uint8List data = Uint8List.fromList(list);
-
+    var aesGcmSecretKey = await AesGcmSecretKey.importRawKey(derivedBits);
     Uint8List encryptedBytes = await aesGcmSecretKey.encryptBytes(data, iv);
 
     String encryptedString = String.fromCharCodes(encryptedBytes);
     print('encryptedString $encryptedString');
     return encryptedString;
+  }
+
+  static Future<String> decryption(
+      AesGcmSecretKey aesGcmSecretKey, String encryptedMessage) async {
+   
+
+    List<int> message = Uint8List.fromList(encryptedMessage.codeUnits);
+
+    Uint8List decryptdBytes = await aesGcmSecretKey.decryptBytes(message, iv);
+
+    String decryptdString = String.fromCharCodes(decryptdBytes);
+    print('decryptdString $decryptdString');
+    return decryptdString;
   }
 }

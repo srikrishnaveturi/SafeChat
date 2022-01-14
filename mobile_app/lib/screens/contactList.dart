@@ -1,6 +1,8 @@
 
+import 'dart:typed_data';
+
 import 'package:chat_app/Firebase/firebaseFunction.dart';
-import 'package:chat_app/security/encryption.dart';
+import 'package:chat_app/security/e2ee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,15 @@ class _ContactsState extends State<Contacts> {
   dynamic userMap;
   late dynamic id;
   
+
+  List<int> dynamic2Uint8ListConvert(List<dynamic> list){
+    var intList = <int>[];
+    list.forEach((element){
+      intList.add(element as int);
+    });
+
+    return intList;
+  }
 
   Widget widgetDecision(requestArray,acceptedArray,uid,BuildContext context,index){
     if(listOfSnapshots[index].get('requestSent').contains(userMap.get('id'))){
@@ -166,12 +177,15 @@ class _ContactsState extends State<Contacts> {
                                 dynamic finalString=sortList[0]+sortList[1];
 
                                 if(!pref.getStringList('securedConvos')!.contains(finalString)){
-                                   var aesKey = await End2EndEncryption.returnAESKey(listOfSnapshots[index].get('publicKey'),json.decode(pref.getString('privateKey')!) );
+                                   var derivedBits = await End2EndEncryption.returnDerivedBits(json.decode(listOfSnapshots[index].get('publicKey')),json.decode(pref.getString('privateKey')!) );
                                    var list = pref.getStringList('securedConvos');
                                    list!.add(finalString);
                                    pref.setStringList('securedConvos', list);
-                                   var map = json.decode(pref.getString('AESMap')!);
-                                   map[finalString]=aesKey;
+                                   var map = json.decode(pref.getString('DerivedBitsMap')!);
+                                   map[finalString]=derivedBits;
+                                  
+                                   await pref.setString('DerivedBitsMap', json.encode(map));
+                                   print('DOnnneeeeee');
 
                                 }
 
@@ -187,7 +201,8 @@ class _ContactsState extends State<Contacts> {
                                   'blocked':listOfSnapshots[index].get('blocked'),
                                   'blockedByYou':userMap.get('blocked'),
                                   'blockedStatus':userMap.get('blocked').contains(listOfSnapshots[index].get('id')),
-                                  'aboutMe': listOfSnapshots[index].get('aboutMe')
+                                  'aboutMe': listOfSnapshots[index].get('aboutMe'),
+                                  'DerivedBits': dynamic2Uint8ListConvert(json.decode(pref.getString('DerivedBitsMap')!)[finalString])
                                 });
                               }
 
