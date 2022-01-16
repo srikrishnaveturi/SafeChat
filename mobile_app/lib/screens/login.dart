@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:chat_app/chat/chatClass.dart';
+
 import 'package:chat_app/security/e2ee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,8 +44,8 @@ class LoginScreenState extends State<LoginScreen> {
 
     isLoggedIn = await googleSignIn.isSignedIn();
     if (isLoggedIn && prefs?.getString('id') != null) {
-
-      Navigator.pushReplacementNamed(context, '/home',arguments: prefs!.getString('id'));
+      Navigator.pushReplacementNamed(context, '/home',
+          arguments: prefs!.getString('id'));
     }
 
     this.setState(() {
@@ -67,27 +68,34 @@ class LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken,
       );
 
-      User? firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
+      User? firebaseUser =
+          (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
         // Check is already sign up
-        final QuerySnapshot result =
-        await FirebaseFirestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).get();
+        final QuerySnapshot result = await FirebaseFirestore.instance
+            .collection('users')
+            .where('id', isEqualTo: firebaseUser.uid)
+            .get();
         final List<DocumentSnapshot> documents = result.docs;
+
         if (documents.length == 0) {
           // Update data to server if new user
-         
+
           var x = await End2EndEncryption.generateKeys();
-          print('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB $x');
-          FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
+
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(firebaseUser.uid)
+              .set({
             'name': firebaseUser.displayName,
             'id': firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-            'blocked':[],
-            'aboutMe':'XYZ',
-            'requestSent':[],
-            'requestAccepted':[],
-            'publicKey':json.encode(x[0])
+            'blocked': [],
+            'aboutMe': 'XYZ',
+            'requestSent': [],
+            'requestAccepted': [],
+            'publicKey': json.encode(x[0])
           });
 
           // Write data to local
@@ -95,12 +103,11 @@ class LoginScreenState extends State<LoginScreen> {
           await prefs?.setString('id', currentUser!.uid);
           await prefs?.setString('name', currentUser!.displayName ?? "");
           await prefs?.setString('blocked', '[]');
-          
+
           await prefs?.setString('publicKey', json.encode(x[0]));
           await prefs?.setString('privateKey', json.encode(x[1]));
           await prefs?.setStringList('securedConvos', []);
           await prefs?.setString('DerivedBitsMap', json.encode({}));
-
         } else {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
@@ -114,8 +121,8 @@ class LoginScreenState extends State<LoginScreen> {
         this.setState(() {
           isLoading = false;
         });
-
-        Navigator.pushReplacementNamed(context, '/home',arguments: currentUser!.uid);
+        Navigator.pushReplacementNamed(context, '/home',
+            arguments: currentUser!.uid);
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
         this.setState(() {
@@ -155,13 +162,19 @@ class LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(fontSize: 16.0, color: Colors.white),
                 ),
                 style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Color(0xffdd4b39)),
-                    padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0))),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Color(0xffdd4b39)),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0))),
               ),
             ),
             // Loading
             Positioned(
-              child: isLoading ? Center(child: CircularProgressIndicator(),):Container(),
+              child: isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Container(),
             ),
           ],
         ));

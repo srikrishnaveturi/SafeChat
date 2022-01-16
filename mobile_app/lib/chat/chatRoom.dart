@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:chat_app/Firebase/firebaseFunction.dart';
+import 'package:chat_app/preprocessing/embeddingBuilder.dart';
 import 'package:chat_app/preprocessing/natural_language_processing.dart';
 import 'package:chat_app/security/e2ee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,14 +33,12 @@ class _ChatRoomState extends State<ChatRoom> {
 
   Future<bool> fetchDecryptedMessages(
       List<QueryDocumentSnapshot> encryptedMessages) async {
-        print("LOOOOOOOOOOOOOOOOKKKKKKKKKKK ${data['DerivedBits']}");
-        print(data['DerivedBits'].runtimeType);
-         var aesGcmSecretKey = await AesGcmSecretKey.importRawKey(data['DerivedBits']);
+    var aesGcmSecretKey =
+        await AesGcmSecretKey.importRawKey(data['DerivedBits']);
     for (var msg in encryptedMessages) {
       decryptedMessages.add(await End2EndEncryption.decryption(
           aesGcmSecretKey, msg.get('content')));
     }
-    print('DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
     return true;
   }
 
@@ -100,7 +97,7 @@ class _ChatRoomState extends State<ChatRoom> {
           ),
         ),
         actions: [
-          FlatButton(
+          TextButton(
               onPressed: () async {
                 bool x = await showDialog(
                     context: context,
@@ -113,13 +110,13 @@ class _ChatRoomState extends State<ChatRoom> {
                           height: 100,
                         ),
                         actions: [
-                          FlatButton(
+                          TextButton(
                               onPressed: () async {
                                 await blockMechanism();
                                 Navigator.pop(context, !blockedStatus);
                               },
                               child: Text('Yes')),
-                          FlatButton(
+                          TextButton(
                               onPressed: () {
                                 Navigator.pop(context, blockedStatus);
                               },
@@ -127,13 +124,12 @@ class _ChatRoomState extends State<ChatRoom> {
                         ],
                       );
                     });
-                
+
                 Provider.of<FireBaseFunction>(context, listen: false)
                     .getCurrentBlockedStatus(x);
                 blockedStatus =
                     Provider.of<FireBaseFunction>(context, listen: false)
                         .getBlockedStatus;
-                print(blockedStatus);
               },
               child: StreamBuilder(
                 stream: FirebaseFirestore.instance
@@ -142,7 +138,6 @@ class _ChatRoomState extends State<ChatRoom> {
                     .snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasData) {
-                    print(snapshot.data!.docs[0].get('blocked'));
                     data['blocked'] = snapshot.data!.docs[0].get('blocked');
                   }
                   return Icon(blockedStatus ? Icons.undo : Icons.block);
@@ -230,7 +225,6 @@ class _ChatRoomState extends State<ChatRoom> {
                         future: fetchDecryptedMessages(messages),
                         builder: (context, AsyncSnapshot ss) {
                           if (ss.hasData) {
-                            print('SSSSSSSSSSSSSSSSSSSSSSSSSSSS $ss');
                             return ListView.builder(
                               itemCount: messages.length,
                               controller: scrollController,
@@ -271,12 +265,11 @@ class _ChatRoomState extends State<ChatRoom> {
                                 );
                               },
                             );
-                          }
-                          else{
+                          } else {
                             return Center(
-                              child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.blueGrey)));
+                                child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blueGrey)));
                           }
                         });
                   }
@@ -326,7 +319,6 @@ class _ChatRoomState extends State<ChatRoom> {
                   ),
                   FloatingActionButton(
                     onPressed: () async {
-                      print(data['blocked']);
                       if (data['blocked'].contains(data['id'])) {
                         Fluttertoast.showToast(
                             msg: "You have been blocked by this contact");
@@ -336,7 +328,9 @@ class _ChatRoomState extends State<ChatRoom> {
                             msg: "You have blocked this contact");
                       } else {
                         if (safeModeStatus) {
-                          if (NLP.predict(textMessage.text) > 0.5) {
+                          if (NLP.predict(textMessage.text,
+                                  EmbeddingBuilder.embedding) >
+                              0.5) {
                             showDialog(
                                 context: context,
                                 builder: (ctx) {
@@ -366,8 +360,13 @@ class _ChatRoomState extends State<ChatRoom> {
                           }
                         } else {
                           Provider.of<FireBaseFunction>(context, listen: false)
-                              .onSendMessage(textMessage.text, data['id'],
-                                  data['peerID'], textMessage, data['chatID']);
+                              .onSendMessage(
+                                  await End2EndEncryption.encryption(
+                                      data['DerivedBits'], textMessage.text),
+                                  data['id'],
+                                  data['peerID'],
+                                  textMessage,
+                                  data['chatID']);
                         }
                       }
                     },

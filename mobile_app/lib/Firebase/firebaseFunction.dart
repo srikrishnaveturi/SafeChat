@@ -76,14 +76,11 @@ class FireBaseFunction extends ChangeNotifier {
 
   onBlockOrUnblock(
       uid, peerID, array, BuildContext context, blockedStatus) async {
-    print(blockedStatus);
-
     if (blockedStatus) {
       array.remove(peerID);
     } else {
       array.add(peerID);
     }
-    print(array);
 
     FirebaseFirestore.instance
         .collection('users')
@@ -128,15 +125,13 @@ class FireBaseFunction extends ChangeNotifier {
         .update({'requestSent': requestArray});
   }
 
-  
-
   widgetDecider(requestArray, acceptedArray, uid, BuildContext context, index,
       uMap, list) {
     if (requestArray.contains(uid)) {
       return Row(
         children: [
-          FlatButton(onPressed: () {}, child: Icon(Icons.check)),
-          FlatButton(onPressed: () {}, child: Icon(Icons.clear))
+          TextButton(onPressed: () {}, child: Icon(Icons.check)),
+          TextButton(onPressed: () {}, child: Icon(Icons.clear))
         ],
       );
     } else if (acceptedArray.contains(uid)) {
