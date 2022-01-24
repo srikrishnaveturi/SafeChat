@@ -20,7 +20,9 @@ class _ChatRoomState extends State<ChatRoom> {
   List<String> decryptedMessages = [];
   late bool blockedStatus;
   bool safeModeStatus = true;
-  ScrollController scrollController = new ScrollController();
+  final scrollController = new ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldState =
+      new GlobalKey<ScaffoldState>();
   Map<bool, String> map = {true: 'On', false: 'Off'};
 
   blockMechanism() async {
@@ -33,22 +35,27 @@ class _ChatRoomState extends State<ChatRoom> {
 
   Future<bool> fetchDecryptedMessages(
       List<QueryDocumentSnapshot> encryptedMessages) async {
+    var holder = <String>[];
     var aesGcmSecretKey =
         await AesGcmSecretKey.importRawKey(data['DerivedBits']);
     for (var msg in encryptedMessages) {
-      decryptedMessages.add(await End2EndEncryption.decryption(
+      holder.add(await End2EndEncryption.decryption(
           aesGcmSecretKey, msg.get('content')));
     }
+    decryptedMessages = holder;
     return true;
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
     data = data.isEmpty ? ModalRoute.of(context)!.settings.arguments : data;
     Provider.of<FireBaseFunction>(context).blocked = data['blockedStatus'];
     blockedStatus = Provider.of<FireBaseFunction>(context).blocked;
-
+    
     return Scaffold(
+      key: _scaffoldState,
       appBar: AppBar(
         backgroundColor: Colors.white,
         flexibleSpace: SafeArea(
@@ -186,7 +193,9 @@ class _ChatRoomState extends State<ChatRoom> {
                 builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                   try {
                     safeModeStatus = snapshot.data!.get('safeMode');
+                    
                   } catch (e) {
+                    
                     Provider.of<FireBaseFunction>(context, listen: false)
                         .setSafeMode(data['chatID'], data['id']);
                     safeModeStatus = true;
@@ -222,54 +231,58 @@ class _ChatRoomState extends State<ChatRoom> {
                     messages = snapshot.data!.docs;
 
                     return FutureBuilder(
-                        future: fetchDecryptedMessages(messages),
+                        future: fetchDecryptedMessages(snapshot.data!.docs),
                         builder: (context, AsyncSnapshot ss) {
                           if (ss.hasData) {
-                            return ListView.builder(
-                              itemCount: messages.length,
-                              controller: scrollController,
-                              scrollDirection: Axis.vertical,
-                              padding: EdgeInsets.only(top: 10, bottom: 10),
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  padding: EdgeInsets.only(
-                                      left: 14, right: 14, top: 10, bottom: 10),
-                                  child: Align(
-                                    alignment: (messages[index].get('idFrom') ==
-                                            data['id']
-                                        ? Alignment.topRight
-                                        : Alignment.topLeft),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                            color: (messages[index]
-                                                        .get('idFrom') ==
-                                                    data['id']
-                                                ? Colors.black
-                                                : Colors.green)),
-                                      ),
-                                      padding: EdgeInsets.all(16),
-                                      child: Text(
-                                        decryptedMessages[index],
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            color: (messages[index]
-                                                        .get('idFrom') ==
-                                                    data['id']
-                                                ? Colors.black
-                                                : Colors.green)),
+                            return Container(
+                              height: MediaQuery.of(context).size.height * 0.8,
+                              child: ListView.builder(
+                                itemCount: decryptedMessages.length,
+                                scrollDirection: Axis.vertical,
+                                padding: EdgeInsets.only(top: 10, bottom: 10),
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    padding: EdgeInsets.only(
+                                        left: 14,
+                                        right: 14,
+                                        top: 10,
+                                        bottom: 10),
+                                    child: Align(
+                                      alignment:
+                                          (messages[index].get('idFrom') ==
+                                                  data['id']
+                                              ? Alignment.topRight
+                                              : Alignment.topLeft),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          border: Border.all(
+                                              color: (messages[index]
+                                                          .get('idFrom') ==
+                                                      data['id']
+                                                  ? Colors.black
+                                                  : Colors.green)),
+                                        ),
+                                        padding: EdgeInsets.all(16),
+                                        child: Text(
+                                          decryptedMessages[index],
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: (messages[index]
+                                                          .get('idFrom') ==
+                                                      data['id']
+                                                  ? Colors.black
+                                                  : Colors.green)),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             );
                           } else {
-                            return Center(
-                                child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.blueGrey)));
+                            return Center(child: CircularProgressIndicator());
                           }
                         });
                   }
@@ -329,7 +342,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       } else {
                         if (safeModeStatus) {
                           if (NLP.predict(textMessage.text,
-                                  EmbeddingBuilder.embedding) >
+                                  EmbeddingBuilder.embeddingData) >
                               0.5) {
                             showDialog(
                                 context: context,

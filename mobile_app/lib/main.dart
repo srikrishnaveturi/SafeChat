@@ -20,7 +20,7 @@ void main() async {
         initialRoute: '/login',
         routes:{
           '/home':(context)=>Contacts(),
-          '/login':(context)=>LoginScreen(title: 'Air India'),
+          '/login':(context)=>LoginScreen(title: 'Safe Chat'),
           '/chatRoom': (context)=>ChatRoom(),
           
         }

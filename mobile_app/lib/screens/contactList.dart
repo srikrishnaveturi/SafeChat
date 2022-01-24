@@ -1,5 +1,6 @@
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/preprocessing/embeddingBuilder.dart';
+
 import 'package:chat_app/security/e2ee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -77,6 +78,13 @@ class _ContactsState extends State<Contacts> {
   }
 
   @override
+  void initState(){
+    super.initState();
+    EmbeddingBuilder.setEmbeddingData();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
     id = '';
     id = id.isEmpty ? ModalRoute.of(context)!.settings.arguments : id;
@@ -95,11 +103,7 @@ class _ContactsState extends State<Contacts> {
         ),
       ),
       body: Container(
-          child: FutureBuilder(
-              future: EmbeddingBuilder.embeddingData(),
-              builder: (context, AsyncSnapshot ss) {
-                if (!EmbeddingBuilder.embedding.isEmpty) {
-                  return StreamBuilder<QuerySnapshot>(
+          child: StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('users')
                           .snapshots(),
@@ -236,16 +240,12 @@ class _ContactsState extends State<Contacts> {
                                       ),
                                     ));
                               });
+                        } else {
+                          return Center(child: CircularProgressIndicator());
                         }
-
-                        return Center(child: CircularProgressIndicator());
-                      });
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              })),
+                      }),
+                
+          ),
     );
   }
 }
