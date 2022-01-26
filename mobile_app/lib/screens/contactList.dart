@@ -144,14 +144,14 @@ class _ContactsState extends State<Contacts> {
                                             index),
                                         title: Center(
                                           child: Text(
-                                            listOfSnapshots[index].get('name'),
+                                            listOfSnapshots[index].get('user_ID'),
                                             style: TextStyle(fontSize: 17),
                                           ),
                                         ),
                                         subtitle: Center(
                                           child: Text(
                                             listOfSnapshots[index]
-                                                .get('aboutMe'),
+                                                .get('name'),
                                             style: TextStyle(fontSize: 12),
                                           ),
                                         ),
@@ -221,9 +221,9 @@ class _ContactsState extends State<Contacts> {
                                                       .contains(
                                                           listOfSnapshots[index]
                                                               .get('id')),
-                                                  'aboutMe':
+                                                  'user_ID':
                                                       listOfSnapshots[index]
-                                                          .get('aboutMe'),
+                                                          .get('usee_ID'),
                                                   'DerivedBits':
                                                       dynamic2Uint8ListConvert(
                                                           json.decode(pref

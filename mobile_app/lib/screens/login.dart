@@ -11,6 +11,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+
+
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key, required this.title}) : super(key: key);
 
@@ -28,6 +33,11 @@ class LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool isLoggedIn = false;
   User? currentUser;
+
+  TextEditingController userID = TextEditingController();
+  TextEditingController age = TextEditingController();
+
+  final formKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
@@ -92,6 +102,8 @@ class LoginScreenState extends State<LoginScreen> {
             'id': firebaseUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             'blocked': [],
+            'user_ID': userID.text,
+            'age': int.parse(age.text),
             'aboutMe': 'XYZ',
             'requestSent': [],
             'requestAccepted': [],
@@ -140,43 +152,137 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.title,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          centerTitle: true,
-        ),
-        body: Stack(
-          children: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => handleSignIn().catchError((err) {
-                  Fluttertoast.showToast(msg: err.toString());
-                  this.setState(() {
-                    isLoading = false;
-                  });
-                }),
-                child: Text(
-                  'SIGN IN WITH GOOGLE',
-                  style: TextStyle(fontSize: 16.0, color: Colors.white),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: FormBuilder(
+          key: formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3645,
+                  width: MediaQuery.of(context).size.width * 1,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/images/Login.PNG'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
-                style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Color(0xffdd4b39)),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0))),
-              ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  'Sign Up',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40,
+                    foreground: Paint()..shader=LinearGradient(
+                      colors: <Color>[
+                        Colors.blue[900]!,
+                        Colors.blue[700]!,
+                        Colors.blue[500]!,
+                        Colors.blue[300]!,
+                        
+                      ]
+                      ).createShader(Rect.fromLTWH(0, 0, 200, 100))
+                  ), 
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: FormBuilderTextField(
+                        name: 'UserID',
+                        controller: userID,
+                        
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                            hintText: 'User ID',
+                            labelText: 'User ID',
+                            icon: Icon(
+                              Icons.account_box_outlined,
+                              color: Colors.black,
+                            ),),
+                            
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context),
+                        ]),
+                      ),
+                    ),
+                  ),
+                ),
+          
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: Container(
+                     decoration: BoxDecoration(
+                       border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: FormBuilderTextField(
+                        name: 'age',
+                        controller: age,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                            hintText: 'Age',
+                            labelText: 'Age',
+                            icon: Icon(
+                              Icons.cake,
+                              color: Colors.black,
+                            ),
+                            ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context),
+                          FormBuilderValidators.numeric(context),
+                          FormBuilderValidators.max(context, 100)
+                        ]),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(
+                    child: ButtonTheme(
+                      minWidth: 200,
+                      height: 700,
+                      child: SignInButton(
+                        Buttons.Google, text: 'Sign up with Google',
+                      
+                          onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          handleSignIn().catchError((err) {
+                            Fluttertoast.showToast(msg: err.toString());
+                            this.setState(() {
+                              isLoading = false;
+                            });
+                          });
+                        }
+                      }),
+                    ),
+                  ),
+                ),
+                // Loading
+                isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Container(),
+              ],
             ),
-            // Loading
-            Positioned(
-              child: isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Container(),
-            ),
-          ],
-        ));
+          ),
+        ),
+      ),
+    );
   }
 }
