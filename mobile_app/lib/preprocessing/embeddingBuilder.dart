@@ -1,9 +1,11 @@
 
 
-import 'package:chat_app/preprocessing/embeddingData1.dart';
-import 'package:chat_app/preprocessing/embeddingData2.dart';
-import 'package:chat_app/preprocessing/embeddingData3.dart';
+import 'dart:convert';
+
+
 import 'package:chat_app/preprocessing/tokenizer.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 
 class EmbeddingBuilder {
@@ -43,24 +45,44 @@ class EmbeddingBuilder {
     -0.031761967
   ];
 
-  static Map<String,List<double>> embeddingData = {};
-  
-  static void setEmbeddingData(){
-      embeddingData.addAll(EmbeddingData1.embeddingData1);
-      embeddingData.addAll(EmbeddingData2.embeddingData2);
-      embeddingData.addAll(EmbeddingData3.embeddingData3);
+   static Map<String,List<dynamic>> embeddingData = {};
+
+  static Future<void> fetchJson(BuildContext context, String id) async{
+    var jsonAsString = await rootBundle.loadString('assets/json/FirstLSTM_embedding.json');
+    var jsonVar = json.decode(jsonAsString);
+    Map<String,List<dynamic>> data = {};
+    jsonVar.keys.forEach((key){
+      data[key] = jsonVar[key];
+    });
+    embeddingData = data;
+    Navigator.pushReplacementNamed(context, '/home', arguments: id);
   }
+
+
+  static List<double> convertDynamicList2DoubleList(List<dynamic> list){
+    List<double> doubleList =[];
+    list.forEach((element) {
+      doubleList.add(element as double);
+    });
+
+    return doubleList;
+  }
+
+
+ 
+  
+  
   static List<List<double>> tokenize(
-      String text, Map<String, List<double>> embeddingData, int embeddingDim) {
+      String text, Map<String, List<dynamic>> embeddingData, int embeddingDim) {
     var tokens = Tokenizer.getTokens(text);
 
     List<List<double>> tokenizedMessage = [];
     late List<double> vector;
     for (var part in tokens) {
       if (embeddingData[part] == null) {
-        vector = List.filled(embeddingDim, 0.0);
+        vector = zeroVec;
       } else {
-        vector = embeddingData[part]!;
+        vector = convertDynamicList2DoubleList(embeddingData[part]!);
       }
       tokenizedMessage.add(vector);
     }
@@ -86,7 +108,7 @@ class EmbeddingBuilder {
   }
 
   static List<List<double>> preprocess(
-      String text, Map<String, List<double>> embeddingData) {
+      String text, Map<String, List<dynamic>> embeddingData) {
     var tokenizedArray = tokenize(text, embeddingData, 32);
     var paddedArray = padsequence(tokenizedArray, 32);
 

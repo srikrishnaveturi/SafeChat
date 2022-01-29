@@ -9,8 +9,6 @@ class FireBaseFunction extends ChangeNotifier {
   bool blocked = false;
   Widget widget = Container();
   bool safeMode = true;
-  late Stream<String> decryptedmessages;
-
   get getSafeMode {
     return safeMode;
   }
@@ -18,6 +16,8 @@ class FireBaseFunction extends ChangeNotifier {
   get getBlockedStatus {
     return blocked;
   }
+
+  
 
   storedBlockedState() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -96,28 +96,44 @@ class FireBaseFunction extends ChangeNotifier {
     notifyListeners();
   }
 
-  sendRequest(requestArray, peerID, uid) {
+  sendRequest(requestArray, recievedArray, peerID, uid) {
     requestArray.add(peerID);
+    recievedArray.add(uid);
     FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .update({'requestSent': requestArray});
-  }
-
-  acceptRequest(acceptArray, requestArray, peerID, uid) {
-    acceptArray.add(peerID);
-    requestArray.remove(uid);
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .update({'requestAccepted': acceptArray});
     FirebaseFirestore.instance
         .collection('users')
         .doc(peerID)
-        .update({'requestSent': requestArray});
+        .update({'requestRecieved': recievedArray});
   }
 
-  denyRequest(requestArray, peerID, uid) {
+  acceptRequest(userAcceptArray, userRecievedArray, peerAcceptArray,
+      peerRequestArray, peerID, uid) {
+    userAcceptArray.add(peerID);
+    userRecievedArray.remove(peerID);
+    peerAcceptArray.add(uid);
+    peerRequestArray.remove(uid);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'requestAccepted': userAcceptArray});
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(peerID)
+        .update({'requestSent': peerRequestArray});
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'requestRecieved': userRecievedArray});
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(peerID)
+        .update({'requestAccepted': peerAcceptArray});
+  }
+
+  denyRequest(requestArray,recievedArray, peerID, uid) {
     requestArray.remove(peerID);
     FirebaseFirestore.instance
         .collection('users')
@@ -125,19 +141,5 @@ class FireBaseFunction extends ChangeNotifier {
         .update({'requestSent': requestArray});
   }
 
-  widgetDecider(requestArray, acceptedArray, uid, BuildContext context, index,
-      uMap, list) {
-    if (requestArray.contains(uid)) {
-      return Row(
-        children: [
-          TextButton(onPressed: () {}, child: Icon(Icons.check)),
-          TextButton(onPressed: () {}, child: Icon(Icons.clear))
-        ],
-      );
-    } else if (acceptedArray.contains(uid)) {
-      return Icon(Icons.check);
-    } else if (uMap['requestSent'].contains(list[index].get('id'))) {
-      return Icon(Icons.send);
-    }
-  }
+  
 }

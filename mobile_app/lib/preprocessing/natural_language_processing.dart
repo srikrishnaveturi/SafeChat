@@ -9,7 +9,7 @@ class NLP {
   }
 
   static double predict(
-      String message, Map<String, List<double>> embeddingData) {
+      String message, Map<String, List<dynamic>> embeddingData) {
     var input = [EmbeddingBuilder.preprocess(message, embeddingData)];
     var output = [
       [0.0]

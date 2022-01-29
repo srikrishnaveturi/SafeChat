@@ -54,7 +54,7 @@ class LoginScreenState extends State<LoginScreen> {
 
     isLoggedIn = await googleSignIn.isSignedIn();
     if (isLoggedIn && prefs?.getString('id') != null) {
-      Navigator.pushReplacementNamed(context, '/home',
+      Navigator.pushReplacementNamed(context, '/splash',
           arguments: prefs!.getString('id'));
     }
 
@@ -107,6 +107,7 @@ class LoginScreenState extends State<LoginScreen> {
             'aboutMe': 'XYZ',
             'requestSent': [],
             'requestAccepted': [],
+            'requestRecieved':[],
             'publicKey': json.encode(x[0])
           });
 
@@ -126,14 +127,13 @@ class LoginScreenState extends State<LoginScreen> {
           // Write data to local
           await prefs?.setString('id', userChat.id);
           await prefs?.setString('name', userChat.name);
-          await prefs?.setString('aboutMe', userChat.aboutMe);
           await prefs?.setString('blocked', '[]');
         }
         Fluttertoast.showToast(msg: "Sign in success");
         this.setState(() {
           isLoading = false;
         });
-        Navigator.pushReplacementNamed(context, '/home',
+        Navigator.pushReplacementNamed(context, '/splash',
             arguments: currentUser!.uid);
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
