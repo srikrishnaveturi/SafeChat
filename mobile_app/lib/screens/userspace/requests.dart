@@ -41,35 +41,47 @@ class _RequestsState extends State<Requests> {
               ),
               trailing: Column(
                 children: [
-                  TextButton(
-                      onPressed: () {
-                        Provider.of<FireBaseFunction>(context, listen: false)
-                            .acceptRequest(
-                                widget.you.get('requestAccepted'),
-                                widget.you.get('requestRecieved'),
-                                requests[index].get('requestAccepted'),
-                                requests[index].get('requestSent'),
-                                requests[index].get('id'),
-                                widget.you.get('id'));
-                      },
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.zero,
-                                      side: BorderSide(color: Colors.red)))),
-                      child: Text('Accept')),
-                      TextButton(
-                      onPressed: () {
-                        
-                      },
-                      style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.zero,
-                                      side: BorderSide(color: Colors.red)))),
-                      child: Text('Deny')),
+                  Expanded(
+                    child: ButtonTheme(
+                      height: 15,
+                      child: TextButton(
+                          onPressed: () {
+                            Provider.of<FireBaseFunction>(context, listen: false)
+                                .acceptRequest(
+                                    widget.you.get('requestAccepted'),
+                                    widget.you.get('requestRecieved'),
+                                    requests[index].get('requestAccepted'),
+                                    requests[index].get('requestSent'),
+                                    requests[index].get('id'),
+                                    widget.you.get('id'));
+                          },
+                          style: ButtonStyle(
+                             
+                              shape:
+                                  MaterialStateProperty.all<RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.zero,
+                                          side: BorderSide(color: Colors.red)))),
+                          child: FittedBox(fit:BoxFit.fitHeight,child: Text('Accept'))),
+                    ),
+                  ),
+                  SizedBox(height: 5,),
+                      Expanded(
+                        child: ButtonTheme(
+                        height: 15,
+                        child: TextButton(
+                        onPressed: () {
+                          
+                        },
+                        style: ButtonStyle(
+                            shape:
+                                MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                        side: BorderSide(color: Colors.red)))),
+                        child: FittedBox(fit:BoxFit.fitHeight,child: Text('Deny'))),
+                      ),
+                        )
                 ],
               ),
             ),

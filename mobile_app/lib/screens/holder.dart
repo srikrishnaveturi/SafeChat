@@ -56,6 +56,7 @@ class _HolderState extends State<Holder> {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
+          currentIndex: currentIndex,
           items: [
             BottomNavigationBarItem(
                 icon: Icon(Icons.account_balance),
