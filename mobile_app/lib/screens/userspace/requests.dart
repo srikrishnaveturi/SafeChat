@@ -15,6 +15,7 @@ class _RequestsState extends State<Requests> {
   dynamic requests = [];
   @override
   Widget build(BuildContext context) {
+    requests = [];
     widget.users.forEach((element) {
       if (widget.you.get('requestRecieved').contains(element.get('id'))) {
         requests.add(element);
@@ -36,7 +37,8 @@ class _RequestsState extends State<Requests> {
                 child: Text(requests[index].get('name')),
               ),
               leading: Icon(
-                Icons.account_circle_outlined,
+                Icons.account_circle,
+                color: Colors.blue[800],
                 size: 60,
               ),
               trailing: Column(
@@ -56,13 +58,19 @@ class _RequestsState extends State<Requests> {
                                     widget.you.get('id'));
                           },
                           style: ButtonStyle(
-                             
+                              backgroundColor: MaterialStateProperty.all(Colors.green),
                               shape:
                                   MaterialStateProperty.all<RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
                                           borderRadius: BorderRadius.zero,
                                           side: BorderSide(color: Colors.red)))),
-                          child: FittedBox(fit:BoxFit.fitHeight,child: Text('Accept'))),
+                          child: FittedBox(fit:BoxFit.fitHeight,
+                          child: Text(
+                            'ACCEPT',
+                            style: TextStyle(
+                            color: Colors.white
+                          ),
+                            ))),
                     ),
                   ),
                   SizedBox(height: 5,),
@@ -74,12 +82,19 @@ class _RequestsState extends State<Requests> {
                           
                         },
                         style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Colors.red),
                             shape:
                                 MaterialStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.zero,
                                         side: BorderSide(color: Colors.red)))),
-                        child: FittedBox(fit:BoxFit.fitHeight,child: Text('Deny'))),
+                        child: FittedBox(fit:BoxFit.fitHeight,
+                        child: Text(
+                          'DENY',
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
+                          ))),
                       ),
                         )
                 ],

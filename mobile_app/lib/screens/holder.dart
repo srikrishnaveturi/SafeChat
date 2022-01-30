@@ -18,6 +18,7 @@ class _HolderState extends State<Holder> {
   dynamic userList;
   dynamic userMap;
   late dynamic id;
+  List<String> title =['CONVERATIONS','REQUESTS','CONTACTS'];
 
   Widget returnScreen(int index, dynamic users, dynamic you) {
     if (index == 0) {
@@ -77,25 +78,54 @@ class _HolderState extends State<Holder> {
             });
           },
         ),
-        body: StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('users').snapshots(),
-            builder: (context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                userList = snapshot.data!.docs;
-                
+        body: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Text(
+                  title[currentIndex],
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    foreground: Paint()..shader=LinearGradient(
+                      colors: <Color>[
+                        Colors.blue[900]!,
+                        Colors.blue[700]!,
+                        Colors.blue[500]!,
+                        Colors.blue[300]!,
+                        
+                      ]
+                      ).createShader(Rect.fromLTWH(0, 0, 200, 100))
+                  ), 
+                  ),
+                ],
+                )),
+              
+            Expanded(
+              child: StreamBuilder(
+                  stream: FirebaseFirestore.instance.collection('users').snapshots(),
+                  builder: (context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      userList = snapshot.data!.docs;
+                      
 
-                userList.forEach((element) {
-                  if (element.get('id') == id) {
-                    userMap = element;
-                  }
-                });
+                      userList.forEach((element) {
+                        if (element.get('id') == id) {
+                          userMap = element;
+                        }
+                      });
 
-                userList.remove(userMap);
+                      userList.remove(userMap);
 
-                return returnScreen(currentIndex, userList, userMap);
-              } else {
-                return CircularProgressIndicator();
-              }
-            }));
+                      return returnScreen(currentIndex, userList, userMap);
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  }),
+            ),
+          ],
+        ));
   }
 }

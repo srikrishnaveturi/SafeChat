@@ -25,6 +25,7 @@ class _ConversationState extends State<Conversation> {
 
   @override
   Widget build(BuildContext context) {
+    conversations =[];
     widget.users.forEach((element) {
       if (widget.you.get('requestAccepted').contains(element.get('id'))) {
         conversations.add(element);
@@ -46,8 +47,9 @@ class _ConversationState extends State<Conversation> {
                 child: Text(conversations[index].get('name')),
               ),
               leading: Icon(
-                Icons.account_circle_outlined,
+                Icons.account_circle,
                 size: 60,
+                color: Colors.blue[800],
               ),
               onTap: () async {
                 SharedPreferences pref = await SharedPreferences.getInstance();
