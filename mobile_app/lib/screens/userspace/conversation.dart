@@ -41,10 +41,10 @@ class _ConversationState extends State<Conversation> {
             padding: EdgeInsets.all(20),
             child: ListTile(
               title: Center(
-                child: Text(conversations[index].get('user_ID')),
+                child: Text(conversations[index].get('name')),
               ),
               subtitle: Center(
-                child: Text(conversations[index].get('name')),
+                child: Text(conversations[index].get('user_ID')),
               ),
               leading: Icon(
                 Icons.account_circle,

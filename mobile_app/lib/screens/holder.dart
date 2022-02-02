@@ -1,6 +1,5 @@
 
 import 'package:chat_app/screens/userspace/contacts/contacts.dart';
-import 'package:chat_app/screens/userspace/contacts/contactsHolder.dart';
 import 'package:chat_app/screens/userspace/conversation.dart';
 import 'package:chat_app/screens/userspace/requests.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +17,7 @@ class _HolderState extends State<Holder> {
   dynamic userList;
   dynamic userMap;
   late dynamic id;
-  List<String> title =['CONVERATIONS','REQUESTS','CONTACTS'];
+  List<String> title =['CONVERATIONS','REQUESTS'];
 
   Widget returnScreen(int index, dynamic users, dynamic you) {
     if (index == 0) {
@@ -26,14 +25,14 @@ class _HolderState extends State<Holder> {
         users: users,
         you: you,
       );
-    } else if (index == 1) {
+    } else  {
       return Requests(
         users: users,
         you: you,
       );
     }
 
-    return ContactsHolder();
+    
   }
 
   @override
@@ -50,11 +49,17 @@ class _HolderState extends State<Holder> {
                 Icons.search,
               ),
               onPressed: () {
-                showSearch(
-                    context: context, delegate:ContactsPage(users: userList,you: userMap) );
+                
               },
             ):Container()
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+             showSearch(
+                    context: context, delegate:ContactsPage(users: userList,you: userMap) );
+          },
+          child: Icon(Icons.message),
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentIndex,
@@ -67,10 +72,7 @@ class _HolderState extends State<Holder> {
                 icon: Icon(Icons.account_balance),
                 label: 'Requests',
                 backgroundColor: Colors.white),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.account_balance),
-                label: 'Contacts',
-                backgroundColor: Colors.white)
+            
           ],
           onTap: (index) {
             setState(() {

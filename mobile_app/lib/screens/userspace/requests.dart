@@ -31,10 +31,10 @@ class _RequestsState extends State<Requests> {
             padding: EdgeInsets.all(20),
             child: ListTile(
               title: Center(
-                child: Text(requests[index].get('user_ID')),
+                child: Text(requests[index].get('name')),
               ),
               subtitle: Center(
-                child: Text(requests[index].get('name')),
+                child: Text(requests[index].get('user_ID')),
               ),
               leading: Icon(
                 Icons.account_circle,

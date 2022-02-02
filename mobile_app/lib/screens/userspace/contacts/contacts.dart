@@ -132,7 +132,7 @@ class ContactsPage extends SearchDelegate{
               child: Row(
                 children: [
                   Text(
-                  'CONTACTS',
+                  'SEARCH',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 30,
@@ -160,10 +160,10 @@ class ContactsPage extends SearchDelegate{
                   padding: EdgeInsets.all(20),
                   child: ListTile(
                     title: Center(
-                      child: Text(suggestions[index].get('user_ID')),
+                      child: Text(suggestions[index].get('name')),
                     ),
                     subtitle: Center(
-                      child: Text(suggestions[index].get('name')),
+                      child: Text(suggestions[index].get('user_ID')),
                     ),
                     leading: Icon(
                       Icons.account_circle,
