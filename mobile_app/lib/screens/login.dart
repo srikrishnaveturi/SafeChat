@@ -105,7 +105,7 @@ class LoginScreenState extends State<LoginScreen> {
             'blocked': [],
             'user_ID': userID.text,
             'age': int.parse(age.text),
-            'aboutMe': 'XYZ',
+            'SafeMode': true,
             'requestSent': [],
             'requestAccepted': [],
             'requestRecieved':[],

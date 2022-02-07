@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/security/e2ee.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Conversation extends StatefulWidget {
@@ -74,7 +76,7 @@ class _ConversationState extends State<Conversation> {
 
                   await pref.setString('DerivedBitsMap', json.encode(map));
                 }
-
+                Provider.of<FireBaseFunction>(context,listen: false).setSafeMode(finalString,pref.getString('id')! );
                 Navigator.pushNamed(context, '/chatRoom', arguments: {
                   'chatID': finalString,
                   'id': pref.getString('id'),
@@ -89,7 +91,7 @@ class _ConversationState extends State<Conversation> {
                   'DerivedBits': dynamic2Uint8ListConvert(json
                       .decode(pref.getString('DerivedBitsMap')!)[finalString]),
                 });
-                print('Pusheddddd');
+              
               },
             ),
           ),

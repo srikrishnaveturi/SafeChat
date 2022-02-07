@@ -123,7 +123,7 @@ class _HolderState extends State<Holder> {
 
                       return returnScreen(currentIndex, userList, userMap);
                     } else {
-                      return Expanded(child: Center(child: CircularProgressIndicator(),));
+                      return Center(child: CircularProgressIndicator(),);
                     }
                   }),
             ),
