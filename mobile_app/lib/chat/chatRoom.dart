@@ -2,6 +2,7 @@ import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/preprocessing/embeddingBuilder.dart';
 import 'package:chat_app/preprocessing/natural_language_processing.dart';
 import 'package:chat_app/security/e2ee.dart';
+import 'package:chat_app/service/report.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,9 +22,10 @@ class _ChatRoomState extends State<ChatRoom> {
   late bool blockedStatus;
   bool safeModeStatus = true;
   final scrollController = new ScrollController();
-  final GlobalKey<ScaffoldState> _scaffoldState =
-      new GlobalKey<ScaffoldState>();
   Map<bool, String> map = {true: 'On', false: 'Off'};
+  bool radio1 = false;
+  bool radio2 = false;
+  String toxicityLevel = '0';
 
   blockMechanism() async {
     data['blockedByYou'] =
@@ -55,7 +57,6 @@ class _ChatRoomState extends State<ChatRoom> {
     blockedStatus = Provider.of<FireBaseFunction>(context).blocked;
     
     return Scaffold(
-      key: _scaffoldState,
       appBar: AppBar(
         backgroundColor: Colors.white,
         flexibleSpace: SafeArea(
@@ -95,7 +96,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       SizedBox(
                         height: 5,
                       ),
-                      Text(data['aboutMe'])
+                      Text(data['user_ID'])
                     ],
                   ),
                 ),
@@ -229,8 +230,9 @@ class _ChatRoomState extends State<ChatRoom> {
                                 Colors.blueGrey)));
                   } else {
                     messages = snapshot.data!.docs;
-
+                    print('In Future');
                     return FutureBuilder(
+                      
                         future: fetchDecryptedMessages(snapshot.data!.docs),
                         builder: (context, AsyncSnapshot ss) {
                           if (ss.hasData) {
@@ -241,39 +243,85 @@ class _ChatRoomState extends State<ChatRoom> {
                                 scrollDirection: Axis.vertical,
                                 padding: EdgeInsets.only(top: 10, bottom: 10),
                                 itemBuilder: (context, index) {
-                                  return Container(
-                                    padding: EdgeInsets.only(
-                                        left: 14,
-                                        right: 14,
-                                        top: 10,
-                                        bottom: 10),
-                                    child: Align(
-                                      alignment:
-                                          (messages[index].get('idFrom') ==
-                                                  data['id']
-                                              ? Alignment.topRight
-                                              : Alignment.topLeft),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          border: Border.all(
-                                              color: (messages[index]
-                                                          .get('idFrom') ==
-                                                      data['id']
-                                                  ? Colors.black
-                                                  : Colors.green)),
+                                  return GestureDetector(
+                                    onLongPress: (){
+                                      Widget contentWidget = Column(
+                                      children: [
+                                        Text(decryptedMessages[index]
                                         ),
-                                        padding: EdgeInsets.all(16),
-                                        child: Text(
-                                          decryptedMessages[index],
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color: (messages[index]
-                                                          .get('idFrom') ==
-                                                      data['id']
-                                                  ? Colors.black
-                                                  : Colors.green)),
+                                        ListTile(
+                                          leading: Radio(value: radio1, groupValue: false, onChanged: (_){setState(() {
+                                            radio2 = radio1;
+                                            radio1 = !radio1;
+                                            toxicityLevel = '1';
+                                          });}),
+                                          title: Text('Toxic'),
+                                        ),
+                                         ListTile(
+                                          leading: Radio(value: radio1, groupValue: false, onChanged: (_){setState(() {
+                                            radio1 = radio2;
+                                            radio2 = !radio2;
+                                            toxicityLevel = '0';
+                                          });}),
+                                          title: Text('Not toxic'),
+                                        )
+                                      ],
+                                    );
+                                      showDialog(
+                                context: context,
+                                builder: (ctx) {
+                                   
+                                  return AlertDialog(
+                                    title: Text('REPORT'),
+                                    content: contentWidget,
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () async{
+                                            setState(() {
+                                              contentWidget = Expanded(child: Center(child: CircularProgressIndicator(),));
+                                            });
+                                            await ReportMessage.reportMessage(decryptedMessages[index], toxicityLevel, (String response) {print(response); });
+                                            Navigator.pop(ctx);
+                                          },
+                                          child: Text('Report'))
+                                    ],
+                                  );
+                                });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.only(
+                                          left: 14,
+                                          right: 14,
+                                          top: 10,
+                                          bottom: 10),
+                                      child: Align(
+                                        alignment:
+                                            (messages[index].get('idFrom') ==
+                                                    data['id']
+                                                ? Alignment.topRight
+                                                : Alignment.topLeft),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                                color: (messages[index]
+                                                            .get('idFrom') ==
+                                                        data['id']
+                                                    ? Colors.black
+                                                    : Colors.green)),
+                                          ),
+                                          padding: EdgeInsets.all(16),
+                                          child: Text(
+                                            decryptedMessages[index],
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                color: (messages[index]
+                                                            .get('idFrom') ==
+                                                        data['id']
+                                                    ? Colors.black
+                                                    : Colors.green)),
+                                          ),
                                         ),
                                       ),
                                     ),
