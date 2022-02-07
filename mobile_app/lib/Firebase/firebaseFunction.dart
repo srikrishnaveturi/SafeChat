@@ -17,21 +17,23 @@ class FireBaseFunction extends ChangeNotifier {
     return blocked;
   }
 
-  
-
   storedBlockedState() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getString('blockedStatus');
   }
 
-  void updateSafeMode(String groupChatId, String id, bool mode) {
+  void updateSafeMode(String groupChatId, String id, List<dynamic> ids) {
+    if (ids.contains(id)) {
+      ids.remove(id);
+    } else {
+      ids.add(id);
+    }
     FirebaseFirestore.instance
         .collection('messages')
         .doc(groupChatId)
         .collection('Status')
         .doc('Status')
-        .update({'safeMode': mode, 'userID': id});
-    safeMode = mode;
+        .update({'safeMode': ids});
   }
 
   setSafeMode(String groupChatId, String id) {
@@ -41,11 +43,17 @@ class FireBaseFunction extends ChangeNotifier {
         .collection('Status')
         .doc('Status');
 
-    FirebaseFirestore.instance.runTransaction((transaction) async {
-      transaction.set(
-        documentReference,
-        {'safeMode': true, 'userID': id},
-      );
+    documentReference.get().then((document) {
+      if (!document.exists) {
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          transaction.set(
+            documentReference,
+            {
+              'safeMode': [id]
+            },
+          );
+        });
+      }
     });
   }
 
@@ -133,13 +141,11 @@ class FireBaseFunction extends ChangeNotifier {
         .update({'requestAccepted': peerAcceptArray});
   }
 
-  denyRequest(requestArray,recievedArray, peerID, uid) {
+  denyRequest(requestArray, recievedArray, peerID, uid) {
     requestArray.remove(peerID);
     FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .update({'requestSent': requestArray});
   }
-
-  
 }
