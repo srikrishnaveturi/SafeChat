@@ -4,7 +4,7 @@ import 'package:chat_app/screens/userspace/conversation.dart';
 import 'package:chat_app/screens/userspace/requests.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+import 'package:sizer/sizer.dart';
 class Holder extends StatefulWidget {
   const Holder({Key? key}) : super(key: key);
 
@@ -90,7 +90,7 @@ class _HolderState extends State<Holder> {
                   title[currentIndex],
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 30,
+                    fontSize: 25.sp,
                     foreground: Paint()..shader=LinearGradient(
                       colors: <Color>[
                         Colors.blue[900]!,
@@ -123,7 +123,7 @@ class _HolderState extends State<Holder> {
 
                       return returnScreen(currentIndex, userList, userMap);
                     } else {
-                      return CircularProgressIndicator();
+                      return Expanded(child: Center(child: CircularProgressIndicator(),));
                     }
                   }),
             ),

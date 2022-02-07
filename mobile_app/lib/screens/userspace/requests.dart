@@ -1,6 +1,7 @@
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';
 
 class Requests extends StatefulWidget {
   final dynamic users;
@@ -26,9 +27,9 @@ class _RequestsState extends State<Requests> {
       itemBuilder: (context, index) {
         return Card(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.w)),
           child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(3.h),
             child: ListTile(
               title: Center(
                 child: Text(requests[index].get('name')),
@@ -39,13 +40,13 @@ class _RequestsState extends State<Requests> {
               leading: Icon(
                 Icons.account_circle,
                 color: Colors.blue[800],
-                size: 60,
+                size: 15.w,
               ),
               trailing: Column(
                 children: [
                   Expanded(
                     child: ButtonTheme(
-                      height: 15,
+                      height: 10.h,
                       child: TextButton(
                           onPressed: () {
                             Provider.of<FireBaseFunction>(context, listen: false)
@@ -73,10 +74,10 @@ class _RequestsState extends State<Requests> {
                             ))),
                     ),
                   ),
-                  SizedBox(height: 5,),
+                  SizedBox(height: 0.5.h,),
                       Expanded(
                         child: ButtonTheme(
-                        height: 15,
+                        height: 10.h,
                         child: TextButton(
                         onPressed: () {
                           

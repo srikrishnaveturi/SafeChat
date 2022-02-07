@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:sizer/sizer.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -161,22 +162,20 @@ class LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: <Widget>[
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.3645,
-                  width: MediaQuery.of(context).size.width * 1,
+                  height: 37.h,
+                  width: 100.w,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('assets/images/Login.PNG'),
                         fit: BoxFit.cover),
                   ),
                 ),
-                SizedBox(
-                  height: 20,
-                ),
+                
                 Text(
                   'Sign Up',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 40,
+                    fontSize: 25.sp,
                     foreground: Paint()..shader=LinearGradient(
                       colors: <Color>[
                         Colors.blue[900]!,
@@ -185,18 +184,18 @@ class LoginScreenState extends State<LoginScreen> {
                         Colors.blue[300]!,
                         
                       ]
-                      ).createShader(Rect.fromLTWH(0, 0, 200, 100))
+                      ).createShader(Rect.fromLTWH(0, 0, 200.w, 100.w))
                   ), 
                   ),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding:  EdgeInsets.all(4.w),
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      borderRadius: BorderRadius.all(Radius.circular(40.w)),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(2.w),
                       child: FormBuilderTextField(
                         name: 'UserID',
                         controller: userID,
@@ -219,15 +218,15 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
           
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  padding:  EdgeInsets.fromLTRB(4.w, 0, 4.w, 2.w),
                   child: Container(
                      decoration: BoxDecoration(
                        border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      borderRadius: BorderRadius.all(Radius.circular(40.w)),
                       
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding:  EdgeInsets.all(2.w),
                       child: FormBuilderTextField(
                         name: 'age',
                         controller: age,
@@ -251,11 +250,10 @@ class LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding:  EdgeInsets.all(6.w),
                   child: Center(
                     child: ButtonTheme(
-                      minWidth: 200,
-                      height: 700,
+                      minWidth: 20.w,
                       child: SignInButton(
                         Buttons.Google, text: 'Sign up with Google',
                       
