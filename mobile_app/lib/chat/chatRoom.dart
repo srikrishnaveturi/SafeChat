@@ -6,6 +6,7 @@ import 'package:chat_app/service/report.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:webcrypto/webcrypto.dart';
 import 'package:sizer/sizer.dart';
@@ -370,12 +371,28 @@ class _ChatRoomState extends State<ChatRoom> {
                                                       : Colors.black)),
                                             ),
                                             padding: EdgeInsets.all(16),
-                                            child: Text(
+                                            
+                                              child: Column(
+                                              
+                                             
+                                              children: [
+                                                Text(
                                               decryptedMessages[index],
                                               style: TextStyle(
                                                   fontSize: 15,
                                                   color: Colors.white),
                                             ),
+                                            Text(
+                                                  DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(int.parse(messages[index].get('timestamp')))),
+                                                  style : TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize:7
+                                                  ),
+                                            
+                                            )
+                                              ],
+                                            )
+                                              
                                           ),
                                         ),
                                       ),
