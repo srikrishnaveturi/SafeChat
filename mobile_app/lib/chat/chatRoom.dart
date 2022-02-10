@@ -22,12 +22,8 @@ class _ChatRoomState extends State<ChatRoom> {
   dynamic data = {};
   List<String> decryptedMessages = [];
   late bool blockedStatus;
-  bool safeModeStatus = true;
-  final scrollController = new ScrollController();
   Map<bool, String> map = {true: 'On', false: 'Off'};
-  bool radio1 = false;
-  bool radio2 = false;
-  String toxicityLevel = '0';
+  
   late List<dynamic> safeModeList;
   blockMechanism() async {
     data['blockedByYou'] =
@@ -158,7 +154,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       SizedBox(
                         height: 5,
                       ),
-                      Text(data['user_ID'])
+                      Text(data['appStatus'])
                     ],
                   ),
                 ),
@@ -322,7 +318,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                                               .reportMessage(
                                                                   decryptedMessages[
                                                                       index],
-                                                                  toxicityLevel,
+                                                                  '1',
                                                                   (String
                                                                       response) {
                                                             Fluttertoast.showToast(
