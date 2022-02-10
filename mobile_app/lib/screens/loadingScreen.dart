@@ -14,6 +14,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
+    
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           content: ListTile(
@@ -31,11 +32,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   @override
+  void dispose(){
+    super.dispose();
+  }
+
+  
+
+  @override
   Widget build(BuildContext context) {
     id = '';
     id = id.isEmpty ? ModalRoute.of(context)!.settings.arguments : id;
-    EmbeddingBuilder.fetchJson(context, id);
-
+    EmbeddingBuilder.fetchJson(context);
     return Scaffold(
       body: Container(
           color: Colors.white,

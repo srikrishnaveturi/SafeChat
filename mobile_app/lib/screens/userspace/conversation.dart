@@ -87,7 +87,7 @@ class _ConversationState extends State<Conversation> {
                   'blockedStatus': widget.you
                       .get('blocked')
                       .contains(conversations[index].get('id')),
-                  'appStatus': conversations[index].get('appStatus'),
+                  //'appStatus': conversations[index].get('appStatus'),'
                   'DerivedBits': dynamic2Uint8ListConvert(json
                       .decode(pref.getString('DerivedBitsMap')!)[finalString]),
                 });

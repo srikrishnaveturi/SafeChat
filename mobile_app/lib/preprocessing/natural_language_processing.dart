@@ -5,7 +5,6 @@ class NLP {
   static late Interpreter interpreter;
   static loadModel() async {
     interpreter = await Interpreter.fromAsset('tflite/FirstLSTM.tflite');
-    print('Interpreter loaded successfully');
   }
 
   static double predict(
@@ -15,7 +14,6 @@ class NLP {
       [0.0]
     ];
     interpreter.run(input, output);
-    print('YAAAAAAYYYY ${output[0][0]}');
     return output[0][0];
   }
 }

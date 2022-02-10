@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'package:chat_app/preprocessing/tokenizer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmbeddingBuilder {
   static int maxLength = 20;
@@ -47,15 +48,18 @@ class EmbeddingBuilder {
 
    static Map<String,List<dynamic>> embeddingData = {};
 
-  static Future<void> fetchJson(BuildContext context, String id) async{
+  
+  static void fetchJson(BuildContext context) async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
     var jsonAsString = await rootBundle.loadString('assets/json/FirstLSTM_embedding.json');
     var jsonVar = json.decode(jsonAsString);
-    Map<String,List<dynamic>> data = {};
     jsonVar.keys.forEach((key){
-      data[key] = jsonVar[key];
+      embeddingData[key] = jsonVar[key];
     });
-    embeddingData = data;
-    Navigator.pushReplacementNamed(context, '/home', arguments: id);
+  Navigator.pushReplacementNamed(context, '/home', arguments: pref.getString('id'));
+  Fluttertoast.showToast(msg: 'Resources Setup Sucessful');
+    
+    
   }
 
 
