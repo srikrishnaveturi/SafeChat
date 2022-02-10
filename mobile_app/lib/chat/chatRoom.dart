@@ -119,7 +119,7 @@ class _ChatRoomState extends State<ChatRoom> {
         backgroundColor: Colors.white,
         flexibleSpace: SafeArea(
           child: Container(
-            padding: EdgeInsets.only(right: 16),
+            padding: EdgeInsets.only(right: 5.w),
             child: Row(
               children: <Widget>[
                 IconButton(
@@ -136,10 +136,10 @@ class _ChatRoomState extends State<ChatRoom> {
                 ),
                 CircleAvatar(
                   child: Icon(Icons.account_circle_outlined),
-                  maxRadius: 20,
+                  maxRadius: 7.w,
                 ),
                 SizedBox(
-                  width: 12,
+                  width: 5.w,
                 ),
                 Expanded(
                   child: Column(
@@ -149,12 +149,17 @@ class _ChatRoomState extends State<ChatRoom> {
                       Text(
                         data['name'],
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
+                            fontSize: 13.sp, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(
                         height: 5,
                       ),
-                      Text(data['appStatus'])
+                      Text(
+                        data['name'],
+                        style: TextStyle(
+                          fontSize : 10.sp
+                        ),
+                        )
                     ],
                   ),
                 ),
@@ -164,6 +169,10 @@ class _ChatRoomState extends State<ChatRoom> {
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: Size(7.w, 7.h)
+            ),
               onPressed: () async {
                 bool x = await showDialog(
                     context: context,
@@ -172,8 +181,8 @@ class _ChatRoomState extends State<ChatRoom> {
                         title: Text(
                             'Are you sure you want to ${blockedStatus ? 'unblock' : 'block'} this conversation ?'),
                         content: Container(
-                          width: 100,
-                          height: 100,
+                          width: 50.w,
+                          height: 50.h,
                         ),
                         actions: [
                           TextButton(
@@ -206,10 +215,18 @@ class _ChatRoomState extends State<ChatRoom> {
                   if (snapshot.hasData) {
                     data['blocked'] = snapshot.data!.docs[0].get('blocked');
                   }
-                  return Icon(blockedStatus ? Icons.undo : Icons.block);
+                  return Icon(
+                    blockedStatus ? Icons.undo : Icons.block,
+                    size:7.w
+                    );
                 },
               )),
+              SizedBox(height: 0,),
           TextButton(
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: Size(10.w, 10.h)
+            ),
               onPressed: () async {
                 Provider.of<FireBaseFunction>(context, listen: false)
                     .updateSafeMode(data['chatID'], data['id'], safeModeList);
@@ -226,6 +243,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     safeModeList = snapshot.data!.get('safeMode');
                     return Icon(
                       Icons.health_and_safety_outlined,
+                      size:7.w,
                       color: safeModeColor(snapshot.data!.get('safeMode'),
                           data['id'], data['peerID']),
                     );
@@ -261,7 +279,6 @@ class _ChatRoomState extends State<ChatRoom> {
                                   Colors.blueGrey)));
                     } else {
                       messages = snapshot.data!.docs;
-                      print('In Future');
                       return FutureBuilder(
                           future: fetchDecryptedMessages(snapshot.data!.docs),
                           builder: (context, AsyncSnapshot ss) {
