@@ -32,15 +32,23 @@ class _RequestsState extends State<Requests> {
             padding: EdgeInsets.all(3.h),
             child: ListTile(
               title: Center(
-                child: Text(requests[index].get('name')),
-              ),
+                child: Text(
+                  requests[index].get('name'),
+                  style: TextStyle(fontSize: 14.sp),
+                  ),
+                  ),
+              
               subtitle: Center(
-                child: Text(requests[index].get('user_ID')),
+                child: Text(
+                  requests[index].get('user_ID'),
+                  style: TextStyle(fontSize: 12.sp),
+                  ),
               ),
               leading: Icon(
                 Icons.account_circle,
                 color: Colors.blue[800],
-                size: 15.w,
+                size: 18.w,
+                
               ),
               trailing: Column(
                 children: [

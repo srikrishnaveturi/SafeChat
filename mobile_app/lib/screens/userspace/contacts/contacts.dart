@@ -169,14 +169,19 @@ class ContactsPage extends SearchDelegate{
                       padding: EdgeInsets.all(3.h),
                       child: ListTile(
                         title: Center(
-                          child: Text(suggestions[index].get('name')),
+                          child: Text(
+                            suggestions[index].get('name'),
+                            style: TextStyle(fontSize: 14.sp),
+                            ),
                         ),
                         subtitle: Center(
-                          child: Text(suggestions[index].get('user_ID')),
+                          child: Text(suggestions[index].get('user_ID'),
+                          style: TextStyle(fontSize: 12.sp),
+                          ),
                         ),
                         leading: Icon(
                           Icons.account_circle,
-                          size: 15.w,
+                          size: 18.w,
                           color: Colors.blue[800]
                         ),
                         onTap: () async {

@@ -6,6 +6,7 @@ import 'package:chat_app/preprocessing/natural_language_processing.dart';
 import 'package:chat_app/screens/holder.dart';
 import 'package:chat_app/screens/loadingScreen.dart';
 import 'package:chat_app/screens/login.dart';
+import 'package:chat_app/screens/profile.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -34,7 +35,8 @@ void main() async {
             '/home':(context)=> Holder(),
             '/login':(context)=>LoginScreen(title: 'Safe Chat'),
             '/chatRoom': (context)=>ChatRoom(),
-            '/splash':(context)=> LoadingScreen()
+            '/splash':(context)=> LoadingScreen(),
+            '/profile':(context)=>Profile()
             
           }
       )),

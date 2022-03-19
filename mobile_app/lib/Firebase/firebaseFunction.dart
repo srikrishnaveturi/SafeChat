@@ -108,6 +108,13 @@ class FireBaseFunction extends ChangeNotifier {
     }
   }
 
+  updateProfile(String uid,String displayID, int age, String imageAsString){
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'user_ID':displayID,'age':age,'image':imageAsString});
+  }
+
   onBlockOrUnblock(
       uid, peerID, array, BuildContext context, blockedStatus) async {
     if (blockedStatus) {

@@ -44,6 +44,7 @@ dependencies:
   form_builder_validators: ^7.3.0
   device_preview: ^0.7.4
   sizer: ^2.0.15
+  image_picker: ^0.7.5
   
   
   

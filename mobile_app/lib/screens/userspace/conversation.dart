@@ -4,6 +4,7 @@ import 'package:chat_app/security/e2ee.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sizer/sizer.dart';
 
 class Conversation extends StatefulWidget {
   final dynamic users;
@@ -43,14 +44,20 @@ class _ConversationState extends State<Conversation> {
             padding: EdgeInsets.all(20),
             child: ListTile(
               title: Center(
-                child: Text(conversations[index].get('name')),
+                child: Text(
+                  conversations[index].get('name')
+                  ,
+                  style: TextStyle(fontSize: 14.sp),),
               ),
               subtitle: Center(
-                child: Text(conversations[index].get('user_ID')),
+                child: Text(
+                  conversations[index].get('user_ID'),
+                  style: TextStyle(fontSize: 12.sp),
+                  ),
               ),
               leading: Icon(
                 Icons.account_circle,
-                size: 60,
+                size: 18.w,
                 color: Colors.blue[800],
               ),
               onTap: () async {

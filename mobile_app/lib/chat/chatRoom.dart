@@ -23,7 +23,7 @@ class _ChatRoomState extends State<ChatRoom> {
   List<String> decryptedMessages = [];
   late bool blockedStatus;
   Map<bool, String> map = {true: 'On', false: 'Off'};
-  
+
   late List<dynamic> safeModeList;
   blockMechanism() async {
     data['blockedByYou'] =
@@ -115,6 +115,7 @@ class _ChatRoomState extends State<ChatRoom> {
     blockedStatus = Provider.of<FireBaseFunction>(context).blocked;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         flexibleSpace: SafeArea(
@@ -136,7 +137,7 @@ class _ChatRoomState extends State<ChatRoom> {
                 ),
                 CircleAvatar(
                   child: Icon(Icons.account_circle_outlined),
-                  maxRadius: 7.w,
+                  maxRadius: 5.w,
                 ),
                 SizedBox(
                   width: 5.w,
@@ -149,17 +150,26 @@ class _ChatRoomState extends State<ChatRoom> {
                       Text(
                         data['name'],
                         style: TextStyle(
-                            fontSize: 13.sp, fontWeight: FontWeight.w600),
+                            fontSize: 10.sp, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(
                         height: 5,
                       ),
-                      Text(
-                        data['name'],
-                        style: TextStyle(
-                          fontSize : 10.sp
-                        ),
-                        )
+                      StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .where('id', isEqualTo: data['peerID'])
+                              .snapshots(),
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasData) {
+                              return Text(
+                                  snapshot.data.docs[0].get('appStatus'),
+                                  style: TextStyle(fontSize: 8.sp));
+                            } else {
+                              return Container();
+                            }
+                          })
                     ],
                   ),
                 ),
@@ -169,10 +179,8 @@ class _ChatRoomState extends State<ChatRoom> {
         ),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size(7.w, 7.h)
-            ),
+              style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero, minimumSize: Size(7.w, 7.h)),
               onPressed: () async {
                 bool x = await showDialog(
                     context: context,
@@ -181,8 +189,8 @@ class _ChatRoomState extends State<ChatRoom> {
                         title: Text(
                             'Are you sure you want to ${blockedStatus ? 'unblock' : 'block'} this conversation ?'),
                         content: Container(
-                          width: 50.w,
-                          height: 50.h,
+                          width: 5.w,
+                          height: 5.h,
                         ),
                         actions: [
                           TextButton(
@@ -215,18 +223,16 @@ class _ChatRoomState extends State<ChatRoom> {
                   if (snapshot.hasData) {
                     data['blocked'] = snapshot.data!.docs[0].get('blocked');
                   }
-                  return Icon(
-                    blockedStatus ? Icons.undo : Icons.block,
-                    size:7.w
-                    );
+                  return Icon(blockedStatus ? Icons.undo : Icons.block,
+                      size: 7.w);
                 },
               )),
-              SizedBox(height: 0,),
+          SizedBox(
+            height: 0,
+          ),
           TextButton(
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size(10.w, 10.h)
-            ),
+              style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero, minimumSize: Size(10.w, 10.h)),
               onPressed: () async {
                 Provider.of<FireBaseFunction>(context, listen: false)
                     .updateSafeMode(data['chatID'], data['id'], safeModeList);
@@ -243,7 +249,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     safeModeList = snapshot.data!.get('safeMode');
                     return Icon(
                       Icons.health_and_safety_outlined,
-                      size:7.w,
+                      size: 7.w,
                       color: safeModeColor(snapshot.data!.get('safeMode'),
                           data['id'], data['peerID']),
                     );
@@ -283,9 +289,8 @@ class _ChatRoomState extends State<ChatRoom> {
                           future: fetchDecryptedMessages(snapshot.data!.docs),
                           builder: (context, AsyncSnapshot ss) {
                             if (ss.hasData) {
-                              return Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.99,
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 10.h),
                                 child: ListView.builder(
                                   itemCount: decryptedMessages.length,
                                   scrollDirection: Axis.vertical,
@@ -311,6 +316,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                         showDialog(
                                             context: context,
                                             builder: (ctx) {
+                                              int pressed = 0;
                                               return StatefulBuilder(
                                                   builder: (cx, stateChange) {
                                                 return AlertDialog(
@@ -323,6 +329,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                                     TextButton(
                                                         onPressed: () async {
                                                           stateChange(() {
+                                                            pressed++;
                                                             contentWidget =
                                                                 Expanded(
                                                                     child:
@@ -331,18 +338,20 @@ class _ChatRoomState extends State<ChatRoom> {
                                                                   CircularProgressIndicator(),
                                                             ));
                                                           });
-                                                          await ReportMessage
-                                                              .reportMessage(
-                                                                  decryptedMessages[
-                                                                      index],
-                                                                  '1',
-                                                                  (String
-                                                                      response) {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    'Message Reported');
-                                                          });
-                                                          Navigator.pop(ctx);
+                                                          if (pressed == 1) {
+                                                            await ReportMessage
+                                                                .reportMessage(
+                                                                    decryptedMessages[
+                                                                        index],
+                                                                    '1', (String
+                                                                        response) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Message Reported');
+                                                            });
+                                                            Navigator.pop(ctx);
+                                                          }
                                                         },
                                                         child: Text('Yes')),
                                                     TextButton(
@@ -368,45 +377,43 @@ class _ChatRoomState extends State<ChatRoom> {
                                                   ? Alignment.topRight
                                                   : Alignment.topLeft),
                                           child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              color: messages[index]
-                                                          .get('idFrom') ==
-                                                      data['id']
-                                                  ? Colors.green[800]
-                                                  : Colors.black,
-                                              border: Border.all(
-                                                  color: (messages[index]
-                                                              .get('idFrom') ==
-                                                          data['id']
-                                                      ? Colors.green[800]!
-                                                      : Colors.black)),
-                                            ),
-                                            padding: EdgeInsets.all(16),
-                                            
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: messages[index]
+                                                            .get('idFrom') ==
+                                                        data['id']
+                                                    ? Colors.green[800]
+                                                    : Colors.black,
+                                                border: Border.all(
+                                                    color: (messages[index].get(
+                                                                'idFrom') ==
+                                                            data['id']
+                                                        ? Colors.green[800]!
+                                                        : Colors.black)),
+                                              ),
+                                              padding: EdgeInsets.all(16),
                                               child: Column(
-                                              
-                                             
-                                              children: [
-                                                Text(
-                                              decryptedMessages[index],
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.white),
-                                            ),
-                                            Text(
-                                                  DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(int.parse(messages[index].get('timestamp')))),
-                                                  style : TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize:7
+                                                children: [
+                                                  Text(
+                                                    decryptedMessages[index],
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Colors.white),
                                                   ),
-                                            
-                                            )
-                                              ],
-                                            )
-                                              
-                                          ),
+                                                  Text(
+                                                    DateFormat.jm().format(DateTime
+                                                        .fromMillisecondsSinceEpoch(
+                                                            int.parse(messages[
+                                                                    index]
+                                                                .get(
+                                                                    'timestamp')))),
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 7),
+                                                  )
+                                                ],
+                                              )),
                                         ),
                                       ),
                                     );
@@ -488,18 +495,19 @@ class _ChatRoomState extends State<ChatRoom> {
                                       return AlertDialog(
                                           title: Text('WARNING!'),
                                           content: Container(
-                                            width: 50.w,
-                                            height: 30.h,
-                                            child: content
-                                            ),
+                                              width: 50.w,
+                                              
+                                              child: content),
                                           actions: [
                                             TextButton(
                                                 onPressed: () async {
                                                   if (second) {
                                                     stateChange(() {
                                                       second = false;
-                                                      content =
-                                                          Center(child: CircularProgressIndicator(),);
+                                                      content = Center(
+                                                        child:
+                                                            CircularProgressIndicator(),
+                                                      );
                                                     });
                                                     await ReportMessage
                                                         .reportMessage(

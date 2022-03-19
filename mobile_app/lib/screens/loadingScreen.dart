@@ -20,10 +20,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
           content: ListTile(
         leading: Icon(
           Icons.settings,
-          size: 44,
+          size: 10.w,
           color: Colors.white,
         ),
-        title: Text('Setting up Resources. Please wait...',
+        title: Text('Setting up resources. Please wait...',
             style: TextStyle(
               color: Colors.white,
             )),
@@ -51,7 +51,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
             children: [
               SizedBox(height: 25.h),
               Image.asset('assets/images/splash.png'),
-              Text('Powered by T.R.O.Y')
+              Text(
+                'Powered by T.R.O.Y',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                ),
+                )
             ],
           )
     ));

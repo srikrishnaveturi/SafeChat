@@ -20,7 +20,7 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
   dynamic userList;
   dynamic userMap;
   late dynamic id;
-  List<String> title = ['CONVERATIONS', 'REQUESTS'];
+  List<String> title = ['CONVERSATIONS', 'REQUESTS'];
   late AppLifecycleState _notification;
   SharedPreferences? prefs;
 
@@ -65,6 +65,12 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
     id = id.isEmpty ? ModalRoute.of(context)!.settings.arguments : id;
     return Scaffold(
         appBar: AppBar(
+          leading: GestureDetector(
+          child: Icon(Icons.account_box,color: Colors.red,),
+          onTap: (){
+            Navigator.pushNamed(context, '/profile',arguments: userMap);
+          },
+          ),
           title: Text('Safe Chat'),
           centerTitle: true,
           actions: <Widget>[
