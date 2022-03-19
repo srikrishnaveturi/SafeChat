@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/screens/userspace/contacts/contacts.dart';
 import 'package:chat_app/screens/userspace/conversation.dart';
@@ -24,6 +26,38 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
   late AppLifecycleState _notification;
   SharedPreferences? prefs;
 
+  setSharedPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    return true;
+  }
+
+  Widget fetchProfilePic(BuildContext context){
+    return FutureBuilder(
+      future: setSharedPrefs(),
+      builder: (context, AsyncSnapshot snapshot) {
+      if (snapshot.hasData) {
+        return Padding(
+          padding: EdgeInsets.all(2.w),
+          child: CircleAvatar(
+            backgroundImage:
+                Image.memory(base64Decode(prefs!.getString('image')!)).image,
+          ),
+        );
+      } else {
+        return Padding(
+          padding: EdgeInsets.all(2.w),
+          child:  CircleAvatar(
+          child: Icon(
+            Icons.account_circle,
+            
+            color: Colors.blue[800],
+          ),
+        ),
+          );
+      }
+    });
+  }
+
   Widget returnScreen(int index, dynamic users, dynamic you) {
     if (index == 0) {
       return Conversation(
@@ -48,7 +82,7 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    
+
     WidgetsBinding.instance!.addObserver(this);
     Provider.of<FireBaseFunction>(context, listen: false).setAppStatus();
   }
@@ -66,10 +100,10 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
     return Scaffold(
         appBar: AppBar(
           leading: GestureDetector(
-          child: Icon(Icons.account_box,color: Colors.red,),
-          onTap: (){
-            Navigator.pushNamed(context, '/profile',arguments: userMap);
-          },
+            child: fetchProfilePic(context),
+            onTap: () {
+              Navigator.pushNamed(context, '/profile', arguments: userMap);
+            },
           ),
           title: Text('Safe Chat'),
           centerTitle: true,

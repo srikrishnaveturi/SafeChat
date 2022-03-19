@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -23,13 +24,17 @@ class _ProfileState extends State<Profile> {
   final picker = ImagePicker();
   FileImage setImage = FileImage(File(''));
   String base64Image = '';
+ 
+
 
   void pickImageFromGallery() async {
     final pickedFile =
         await picker.getImage(source: ImageSource.gallery, imageQuality: 25);
     base64Image = base64Encode(await pickedFile!.readAsBytes());
+    SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
       setImage = FileImage(File(pickedFile.path));
+      pref.setString('image', base64Image);
     });
   }
 

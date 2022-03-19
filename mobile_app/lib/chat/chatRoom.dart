@@ -25,6 +25,52 @@ class _ChatRoomState extends State<ChatRoom> {
   Map<bool, String> map = {true: 'On', false: 'Off'};
 
   late List<dynamic> safeModeList;
+
+  Widget dateIndication(index, messages) {
+    if (index > 0) {
+      var sucessiveMsgDateDiff = DateTime.fromMillisecondsSinceEpoch(
+              int.parse(messages[index].get('timestamp')))
+          .difference(DateTime.fromMillisecondsSinceEpoch(
+              int.parse(messages[index - 1].get('timestamp'))))
+          .inDays;
+      var comparisonWithToday = DateTime.now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(
+              int.parse(messages[index].get('timestamp'))))
+          .inDays;
+      if (sucessiveMsgDateDiff >= 1 && comparisonWithToday>0) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(2.w),
+            child: Text(
+              DateFormat('dd-MM-yyyy').format(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      int.parse(messages[index].get('timestamp')))),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      } else if (sucessiveMsgDateDiff >= 1 && comparisonWithToday == 0) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(2.w),
+            child: Text(
+              'Today',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+
+    return Container();
+  }
+
   blockMechanism() async {
     data['blockedByYou'] =
         await Provider.of<FireBaseFunction>(context, listen: false)
@@ -296,126 +342,140 @@ class _ChatRoomState extends State<ChatRoom> {
                                   scrollDirection: Axis.vertical,
                                   padding: EdgeInsets.only(top: 10, bottom: 10),
                                   itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onLongPress: () {
-                                        Widget contentWidget = Column(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.all(10.w),
-                                              child: Text(
-                                                decryptedMessages[index],
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Text(
-                                                'Are you sure you want to report this message as TOXIC?')
-                                          ],
-                                        );
-                                        showDialog(
-                                            context: context,
-                                            builder: (ctx) {
-                                              int pressed = 0;
-                                              return StatefulBuilder(
-                                                  builder: (cx, stateChange) {
-                                                return AlertDialog(
-                                                  title: Text('REPORT'),
-                                                  content: Container(
-                                                      height: 30.h,
-                                                      width: 70.h,
-                                                      child: contentWidget),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () async {
-                                                          stateChange(() {
-                                                            pressed++;
-                                                            contentWidget =
-                                                                Expanded(
-                                                                    child:
-                                                                        Center(
-                                                              child:
-                                                                  CircularProgressIndicator(),
-                                                            ));
-                                                          });
-                                                          if (pressed == 1) {
-                                                            await ReportMessage
-                                                                .reportMessage(
-                                                                    decryptedMessages[
-                                                                        index],
-                                                                    '1', (String
-                                                                        response) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Message Reported');
-                                                            });
-                                                            Navigator.pop(ctx);
-                                                          }
-                                                        },
-                                                        child: Text('Yes')),
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(ctx);
-                                                        },
-                                                        child: Text('No'))
-                                                  ],
-                                                );
-                                              });
-                                            });
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(
-                                            left: 14,
-                                            right: 14,
-                                            top: 10,
-                                            bottom: 10),
-                                        child: Align(
-                                          alignment:
-                                              (messages[index].get('idFrom') ==
+                                    return Column(
+                                      children: [
+                                        dateIndication(index, messages),
+                                        GestureDetector(
+                                          onLongPress: () {
+                                            Widget contentWidget = Column(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.all(10.w),
+                                                  child: Text(
+                                                    decryptedMessages[index],
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                                Text(
+                                                    'Are you sure you want to report this message as TOXIC?')
+                                              ],
+                                            );
+                                            showDialog(
+                                                context: context,
+                                                builder: (ctx) {
+                                                  int pressed = 0;
+                                                  return StatefulBuilder(
+                                                      builder:
+                                                          (cx, stateChange) {
+                                                    return AlertDialog(
+                                                      title: Text('REPORT'),
+                                                      content: Container(
+                                                          height: 30.h,
+                                                          width: 70.h,
+                                                          child: contentWidget),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed:
+                                                                () async {
+                                                              stateChange(() {
+                                                                pressed++;
+                                                                contentWidget =
+                                                                    Expanded(
+                                                                        child:
+                                                                            Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(),
+                                                                ));
+                                                              });
+                                                              if (pressed ==
+                                                                  1) {
+                                                                await ReportMessage
+                                                                    .reportMessage(
+                                                                        decryptedMessages[
+                                                                            index],
+                                                                        '1',
+                                                                        (String
+                                                                            response) {
+                                                                  Fluttertoast
+                                                                      .showToast(
+                                                                          msg:
+                                                                              'Message Reported');
+                                                                });
+                                                                Navigator.pop(
+                                                                    ctx);
+                                                              }
+                                                            },
+                                                            child: Text('Yes')),
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  ctx);
+                                                            },
+                                                            child: Text('No'))
+                                                      ],
+                                                    );
+                                                  });
+                                                });
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.only(
+                                                left: 14,
+                                                right: 14,
+                                                top: 10,
+                                                bottom: 10),
+                                            child: Align(
+                                              alignment: (messages[index]
+                                                          .get('idFrom') ==
                                                       data['id']
                                                   ? Alignment.topRight
                                                   : Alignment.topLeft),
-                                          child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                color: messages[index]
-                                                            .get('idFrom') ==
-                                                        data['id']
-                                                    ? Colors.green[800]
-                                                    : Colors.black,
-                                                border: Border.all(
-                                                    color: (messages[index].get(
+                                              child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    color: messages[index].get(
                                                                 'idFrom') ==
                                                             data['id']
-                                                        ? Colors.green[800]!
-                                                        : Colors.black)),
-                                              ),
-                                              padding: EdgeInsets.all(16),
-                                              child: Column(
-                                                children: [
-                                                  Text(
-                                                    decryptedMessages[index],
-                                                    style: TextStyle(
-                                                        fontSize: 15,
-                                                        color: Colors.white),
+                                                        ? Colors.green[800]
+                                                        : Colors.black,
+                                                    border: Border.all(
+                                                        color: (messages[index].get(
+                                                                    'idFrom') ==
+                                                                data['id']
+                                                            ? Colors.green[800]!
+                                                            : Colors.black)),
                                                   ),
-                                                  Text(
-                                                    DateFormat.jm().format(DateTime
-                                                        .fromMillisecondsSinceEpoch(
-                                                            int.parse(messages[
-                                                                    index]
-                                                                .get(
-                                                                    'timestamp')))),
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 7),
-                                                  )
-                                                ],
-                                              )),
-                                        ),
-                                      ),
+                                                  padding: EdgeInsets.all(16),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        decryptedMessages[
+                                                            index],
+                                                        style: TextStyle(
+                                                            fontSize: 15,
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                      Text(
+                                                        DateFormat.jm().format(DateTime
+                                                            .fromMillisecondsSinceEpoch(
+                                                                int.parse(messages[
+                                                                        index]
+                                                                    .get(
+                                                                        'timestamp')))),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 7),
+                                                      )
+                                                    ],
+                                                  )),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     );
                                   },
                                 ),
@@ -495,9 +555,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                       return AlertDialog(
                                           title: Text('WARNING!'),
                                           content: Container(
-                                              width: 50.w,
-                                              
-                                              child: content),
+                                              width: 50.w, child: content),
                                           actions: [
                                             TextButton(
                                                 onPressed: () async {
