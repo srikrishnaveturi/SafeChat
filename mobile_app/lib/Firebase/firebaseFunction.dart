@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
 class FireBaseFunction extends ChangeNotifier {
   bool blocked = false;
@@ -35,11 +34,12 @@ class FireBaseFunction extends ChangeNotifier {
         .update({'appStatus':'Online'});
     }
     else{
+
       
       FirebaseFirestore.instance
         .collection('users')
         .doc(pref.getString('id'))
-        .update({'appStatus':'Last seen at ${DateFormat.jm().format(DateTime.now())}'});
+        .update({'appStatus':DateTime.now().toString()});
     }
   }
 

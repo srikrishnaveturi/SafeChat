@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/Firebase/firebaseFunction.dart';
+import 'package:chat_app/chat/chatClass.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -24,8 +25,6 @@ class _ProfileState extends State<Profile> {
   final picker = ImagePicker();
   FileImage setImage = FileImage(File(''));
   String base64Image = '';
- 
-
 
   void pickImageFromGallery() async {
     final pickedFile =
@@ -40,13 +39,17 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    print(You.id);
+    
     data = data == null ? ModalRoute.of(context)!.settings.arguments : data;
-    print('DATAAAAA $data');
-    userID.text = data['user_ID'];
-    age.text = data['age'].toString();
-   if(base64Image.length==0){
-     base64Image=data['image'];
-   }
+    print(data);
+    if (userID.text.isEmpty) {
+      userID.text = data['user_ID'];
+      age.text = data['age'].toString();
+    }
+    if (base64Image.length == 0) {
+      base64Image = data['image'];
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text('Profile'),
@@ -59,105 +62,125 @@ class _ProfileState extends State<Profile> {
                 child: SingleChildScrollView(
                   child: Center(
                     child: Center(
-                      child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.w),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(15.w, 15.w, 15.w, 5.w),
+                            child: base64Image.length == 0
+                                ? CircleAvatar(
+                                  radius: 12.w,
+                                    child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.blue[800],
+                                  ))
+                                : CircleAvatar(
+                                  radius:12.w,
+                                    backgroundImage:
+                                        Image.memory(base64Decode(base64Image))
+                                            .image,
+                                  ),
                           ),
-                          child: Column(
+                          You.id == data['id']
+                              ? IconButton(
+                                  onPressed: () {
+                                    pickImageFromGallery();
+                                  },
+                                  icon: Icon(Icons.camera),
+                                )
+                              : Container(),
+                          Text(
+                            data['name'],
+                            style: TextStyle(
+                              fontSize: 20.sp,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(3.w),
+                            child: FormBuilderTextField(
+                              name: 'UserID',
+                              controller: userID,
+                              enabled: You.id == data['id'] ? true : false,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'User ID',
+                                labelText: 'User ID',
+                                
+                                icon: Icon(
+                                  Icons.account_box_outlined,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom: 3.w, left: 3.w, right: 3.w),
+                            child: FormBuilderTextField(
+                              name: 'Age',
+                              controller: age,
+                              enabled: You.id == data['id'] ? true : false,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Age',
+                                labelText: 'Age',
+                                
+                                icon: Icon(
+                                  Icons.cake,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(15.w),
-                                child: CircleAvatar(
-                                 
-                                  backgroundImage: base64Image.length == 0
-                                      ? AssetImage('assets/images/Space.png')
-                                      : Image.memory(
-                                              base64Decode(base64Image))
-                                          .image,
-                                  radius: 12.w,
+                                padding: EdgeInsets.only(
+                                    bottom: 5.w, left: 3.w, right: 3.w),
+                                child: Text(
+                                  'Converstaions : ${data['requestAccepted'].length}',
+                                  style: TextStyle(fontSize: 15.sp),
                                 ),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  pickImageFromGallery();
-                                },
-                                icon: Icon(Icons.camera),
-                              ),
-                              Text(
-                                data['name'],
-                                style: TextStyle(
-                                  fontSize: 20.sp,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(5.w),
-                                child: FormBuilderTextField(
-                                  name: 'UserID',
-                                  controller: userID,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'User ID',
-                                    labelText: 'User ID',
-                                    icon: Icon(
-                                      Icons.account_box_outlined,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
                               Padding(
                                 padding: EdgeInsets.only(
-                                    bottom: 5.w, left: 5.w, right: 5.w),
-                                child: FormBuilderTextField(
-                                  name: 'Age',
-                                  controller: age,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Age',
-                                    labelText: 'Age',
-                                    icon: Icon(
-                                      Icons.cake,
-                                      color: Colors.black,
-                                    ),
-                                  ),
+                                    bottom: 5.w, left: 3.w, right: 3.w),
+                                child: Text(
+                                  'Requests : ${data['requestRecieved'].length}',
+                                  style: TextStyle(fontSize: 15.sp),
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: 5.w, left: 5.w, right: 5.w),
-                                    child: Text(
-                                      'Converstaions : ${data['requestAccepted'].length}',
-                                      style: TextStyle(fontSize: 15.sp),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: 5.w, left: 5.w, right: 5.w),
-                                    child: Text(
-                                      'Requests : ${data['requestRecieved'].length}',
-                                      style: TextStyle(fontSize: 15.sp),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              TextButton(
+                            ],
+                          ),
+                          You.id == data['id']
+                              ? TextButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              Colors.blue),
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.zero,
+                                              side: BorderSide(
+                                                  color: Colors.blue)))),
                                   onPressed: () {
                                     Provider.of<FireBaseFunction>(context,
                                             listen: false)
                                         .updateProfile(data['id'], userID.text,
                                             int.parse(age.text), base64Image);
                                     Navigator.pop(context);
-                                    Fluttertoast.showToast(msg: 'Update sucessfull');
+                                    Fluttertoast.showToast(
+                                        msg: 'Update sucessfull');
                                   },
-                                  child: Text('Edit'))
-                            ],
-                          )),
+                                  child: Text('Edit',
+                                      style: TextStyle(color: Colors.white)))
+                              : Container()
+                        ],
+                      ),
                     ),
                   ),
                 ),

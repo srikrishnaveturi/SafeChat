@@ -28,7 +28,7 @@ class _ConversationState extends State<Conversation> {
 
   @override
   Widget build(BuildContext context) {
-    conversations =[];
+    conversations = [];
     widget.users.forEach((element) {
       if (widget.you.get('requestAccepted').contains(element.get('id'))) {
         conversations.add(element);
@@ -45,21 +45,30 @@ class _ConversationState extends State<Conversation> {
             child: ListTile(
               title: Center(
                 child: Text(
-                  conversations[index].get('name')
-                  ,
-                  style: TextStyle(fontSize: 14.sp),),
+                  conversations[index].get('name'),
+                  style: TextStyle(fontSize: 14.sp),
+                ),
               ),
               subtitle: Center(
                 child: Text(
                   conversations[index].get('user_ID'),
                   style: TextStyle(fontSize: 12.sp),
-                  ),
+                ),
               ),
-              leading: Icon(
-                Icons.account_circle,
-                size: 18.w,
-                color: Colors.blue[800],
-              ),
+              leading: conversations[index].get('image').length == 0
+                  ? CircleAvatar(
+                    radius: 10.w,
+                      child: Icon(
+                      Icons.account_circle,
+                      color: Colors.blue[800],
+                      
+                    ))
+                  : CircleAvatar(
+                    radius: 10.w,
+                      backgroundImage: Image.memory(
+                              base64Decode(conversations[index].get('image')))
+                          .image,
+                    ),
               onTap: () async {
                 SharedPreferences pref = await SharedPreferences.getInstance();
                 List<dynamic> sortList = [
@@ -83,7 +92,8 @@ class _ConversationState extends State<Conversation> {
 
                   await pref.setString('DerivedBitsMap', json.encode(map));
                 }
-                Provider.of<FireBaseFunction>(context,listen: false).setSafeMode(finalString,pref.getString('id')! );
+                Provider.of<FireBaseFunction>(context, listen: false)
+                    .setSafeMode(finalString, pref.getString('id')!);
                 Navigator.pushNamed(context, '/chatRoom', arguments: {
                   'chatID': finalString,
                   'id': pref.getString('id'),
@@ -97,8 +107,13 @@ class _ConversationState extends State<Conversation> {
                   //'appStatus': conversations[index].get('appStatus'),'
                   'DerivedBits': dynamic2Uint8ListConvert(json
                       .decode(pref.getString('DerivedBitsMap')!)[finalString]),
+
+                  'image':conversations[index].get('image'),
+                 'requestRecieved': conversations[index].get('requestRecieved'),
+                 'requestAccepted': conversations[index].get('requestAccepted'),
+                 'age':conversations[index].get('age'),
+                 'user_ID':conversations[index].get('user_ID')
                 });
-              
               },
             ),
           ),

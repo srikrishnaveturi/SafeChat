@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:chat_app/preprocessing/embeddingBuilder.dart';
 import 'package:chat_app/preprocessing/natural_language_processing.dart';
@@ -26,8 +28,55 @@ class _ChatRoomState extends State<ChatRoom> {
 
   late List<dynamic> safeModeList;
 
+  String lastSeenDate(DateTime dateTime) {
+    
+    if (DateTime.now().difference(dateTime).inDays >= 1) {
+      return 'Last seen on ${DateFormat('dd-MM-yyyy').format(dateTime)}';
+    }
+
+    return 'Last Seen at ${DateFormat.jm().format(dateTime)}';
+  }
+
   Widget dateIndication(index, messages) {
-    if (index > 0) {
+    if (index == 0) {
+      if (DateTime.now()
+              .difference(DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(messages[index].get('timestamp'))))
+              .inDays ==
+          0) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(2.w),
+            child: Text(
+              'Today',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      } else if (DateTime.now()
+              .difference(DateTime.fromMillisecondsSinceEpoch(
+                  int.parse(messages[index].get('timestamp'))))
+              .inDays >
+          0) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(2.w),
+            child: Text(
+              DateFormat('dd-MM-yyyy').format(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      int.parse(messages[index].get('timestamp')))),
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    } else if (index > 0) {
       var sucessiveMsgDateDiff = DateTime.fromMillisecondsSinceEpoch(
               int.parse(messages[index].get('timestamp')))
           .difference(DateTime.fromMillisecondsSinceEpoch(
@@ -37,7 +86,7 @@ class _ChatRoomState extends State<ChatRoom> {
           .difference(DateTime.fromMillisecondsSinceEpoch(
               int.parse(messages[index].get('timestamp'))))
           .inDays;
-      if (sucessiveMsgDateDiff >= 1 && comparisonWithToday>0) {
+      if (sucessiveMsgDateDiff >= 1 && comparisonWithToday > 0) {
         return Container(
           decoration: BoxDecoration(
             color: Colors.black,
@@ -181,42 +230,67 @@ class _ChatRoomState extends State<ChatRoom> {
                 SizedBox(
                   width: 2,
                 ),
-                CircleAvatar(
-                  child: Icon(Icons.account_circle_outlined),
-                  maxRadius: 5.w,
-                ),
+                data['image'].length == 0
+                    ? CircleAvatar(
+                        maxRadius: 5.w,
+                        child: Icon(
+                          Icons.account_circle,
+                          color: Colors.blue[800],
+                        ))
+                    : CircleAvatar(
+                        maxRadius: 5.w,
+                        backgroundImage:
+                            Image.memory(base64Decode(data['image'])).image,
+                      ),
                 SizedBox(
                   width: 5.w,
                 ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        data['name'],
-                        style: TextStyle(
-                            fontSize: 10.sp, fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection('users')
-                              .where('id', isEqualTo: data['peerID'])
-                              .snapshots(),
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (snapshot.hasData) {
-                              return Text(
-                                  snapshot.data.docs[0].get('appStatus'),
-                                  style: TextStyle(fontSize: 8.sp));
-                            } else {
-                              return Container();
-                            }
-                          })
-                    ],
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile', arguments: {
+                        'name': data['name'],
+                        'id': data['peerID'],
+                        'user_ID': data['user_ID'],
+                        'age': data['age'],
+                        'requestRecieved': data['requestRecieved'],
+                        'requestAccepted': data['requestAccepted'],
+                        'image': data['image']
+                      });
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          data['name'],
+                          style: TextStyle(
+                              fontSize: 10.sp, fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .where('id', isEqualTo: data['peerID'])
+                                .snapshots(),
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                    snapshot
+                                        .data.docs[0]
+                                        .get('appStatus')=='Online'? 'Online':lastSeenDate(DateTime.parse(snapshot
+                                        .data.docs[0]
+                                        .get('appStatus'))),
+                                    style: TextStyle(fontSize: 8.sp));
+                              } else {
+                                return Container();
+                              }
+                            })
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -280,8 +354,8 @@ class _ChatRoomState extends State<ChatRoom> {
               style: TextButton.styleFrom(
                   padding: EdgeInsets.zero, minimumSize: Size(10.w, 10.h)),
               onPressed: () async {
-                Provider.of<FireBaseFunction>(context, listen: false)
-                    .updateSafeMode(data['chatID'], data['id'], safeModeList);
+                //Provider.of<FireBaseFunction>(context, listen: false)
+                    //.updateSafeMode(data['chatID'], data['id'], safeModeList);
               },
               child: StreamBuilder(
                 stream: FirebaseFirestore.instance
@@ -555,7 +629,9 @@ class _ChatRoomState extends State<ChatRoom> {
                                       return AlertDialog(
                                           title: Text('WARNING!'),
                                           content: Container(
-                                              width: 50.w, child: content),
+                                              height: 25.h,
+                                              width: 50.w,
+                                              child: content),
                                           actions: [
                                             TextButton(
                                                 onPressed: () async {
@@ -585,7 +661,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                                         Padding(
                                                           padding:
                                                               EdgeInsets.all(
-                                                                  10.w),
+                                                                  5.w),
                                                           child: Text(
                                                               textMessage.text,
                                                               style: TextStyle(

@@ -9,6 +9,7 @@ class Chat{
 }
 
 class UserChat {
+
   String id;
   String aboutMe;
   String name;
@@ -31,4 +32,7 @@ class UserChat {
       aboutMe: aboutMe,
     );
   }
+}
+class You{
+  static String id = '';
 }

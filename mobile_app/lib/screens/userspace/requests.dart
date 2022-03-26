@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_app/Firebase/firebaseFunction.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,21 +37,28 @@ class _RequestsState extends State<Requests> {
                 child: Text(
                   requests[index].get('name'),
                   style: TextStyle(fontSize: 14.sp),
-                  ),
-                  ),
-              
+                ),
+              ),
               subtitle: Center(
                 child: Text(
                   requests[index].get('user_ID'),
                   style: TextStyle(fontSize: 12.sp),
-                  ),
+                ),
               ),
-              leading: Icon(
-                Icons.account_circle,
-                color: Colors.blue[800],
-                size: 18.w,
-                
-              ),
+              leading: requests[index].get('image').length == 0
+                  ? CircleAvatar(
+                     radius: 10.w,
+                      child: Icon(
+                      Icons.account_circle,
+                      color: Colors.blue[800],
+                     
+                    ))
+                  : CircleAvatar(
+                     radius: 10.w,
+                      backgroundImage: Image.memory(
+                              base64Decode(requests[index].get('image')))
+                          .image,
+                    ),
               trailing: Column(
                 children: [
                   Expanded(
@@ -57,7 +66,8 @@ class _RequestsState extends State<Requests> {
                       height: 10.h,
                       child: TextButton(
                           onPressed: () {
-                            Provider.of<FireBaseFunction>(context, listen: false)
+                            Provider.of<FireBaseFunction>(context,
+                                    listen: false)
                                 .acceptRequest(
                                     widget.you.get('requestAccepted'),
                                     widget.you.get('requestRecieved'),
@@ -67,45 +77,45 @@ class _RequestsState extends State<Requests> {
                                     widget.you.get('id'));
                           },
                           style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Colors.green),
-                              shape:
-                                  MaterialStateProperty.all<RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.zero,
-                                          side: BorderSide(color: Colors.red)))),
-                          child: FittedBox(fit:BoxFit.fitHeight,
-                          child: Text(
-                            'ACCEPT',
-                            style: TextStyle(
-                            color: Colors.white
-                          ),
-                            ))),
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.green),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                      side: BorderSide(color: Colors.red)))),
+                          child: FittedBox(
+                              fit: BoxFit.fitHeight,
+                              child: Text(
+                                'ACCEPT',
+                                style: TextStyle(color: Colors.white),
+                              ))),
                     ),
                   ),
-                  SizedBox(height: 0.5.h,),
-                      Expanded(
-                        child: ButtonTheme(
-                        height: 10.h,
-                        child: TextButton(
-                        onPressed: () {
-                          
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.red),
-                            shape:
-                                MaterialStateProperty.all<RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero,
-                                        side: BorderSide(color: Colors.red)))),
-                        child: FittedBox(fit:BoxFit.fitHeight,
-                        child: Text(
-                          'DENY',
-                          style: TextStyle(
-                            color: Colors.white
-                          ),
-                          ))),
-                      ),
-                        )
+                  SizedBox(
+                    height: 0.5.h,
+                  ),
+                  Expanded(
+                    child: ButtonTheme(
+                      height: 10.h,
+                      child: TextButton(
+                          onPressed: () {},
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.red),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                      side: BorderSide(color: Colors.red)))),
+                          child: FittedBox(
+                              fit: BoxFit.fitHeight,
+                              child: Text(
+                                'DENY',
+                                style: TextStyle(color: Colors.white),
+                              ))),
+                    ),
+                  )
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_app/Firebase/firebaseFunction.dart';
+import 'package:chat_app/chat/chatClass.dart';
 import 'package:chat_app/screens/userspace/contacts/contacts.dart';
 import 'package:chat_app/screens/userspace/conversation.dart';
 import 'package:chat_app/screens/userspace/requests.dart';
@@ -28,6 +29,9 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
 
   setSharedPrefs() async {
     prefs = await SharedPreferences.getInstance();
+    if(prefs!.getString('image')==null){
+      prefs!.setString('image', '');
+    }
     return true;
   }
 
@@ -38,10 +42,17 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
       if (snapshot.hasData) {
         return Padding(
           padding: EdgeInsets.all(2.w),
-          child: CircleAvatar(
-            backgroundImage:
-                Image.memory(base64Decode(prefs!.getString('image')!)).image,
-          ),
+          child: prefs!.getString('image')!.length == 0
+                                ? CircleAvatar(
+                                    child: Icon(
+                                    Icons.account_circle,
+                                    color: Colors.blue[800],
+                                  ))
+                                : CircleAvatar(
+                                    backgroundImage:
+                                        Image.memory(base64Decode(prefs!.getString('image')!))
+                                            .image,
+                                  ),
         );
       } else {
         return Padding(
@@ -177,6 +188,7 @@ class _HolderState extends State<Holder> with WidgetsBindingObserver {
                       userList.forEach((element) {
                         if (element.get('id') == id) {
                           userMap = element;
+                          You.id = element.get('id');
                         }
                       });
 

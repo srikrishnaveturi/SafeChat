@@ -109,7 +109,8 @@ class LoginScreenState extends State<LoginScreen> {
             'requestSent': [],
             'requestAccepted': [],
             'requestRecieved':[],
-            'publicKey': json.encode(x[0])
+            'publicKey': json.encode(x[0]),
+            'image':''
           });
 
           // Write data to local
@@ -122,6 +123,7 @@ class LoginScreenState extends State<LoginScreen> {
           await prefs?.setString('privateKey', json.encode(x[1]));
           await prefs?.setStringList('securedConvos', []);
           await prefs?.setString('DerivedBitsMap', json.encode({}));
+          await prefs?.setString('image', '');
         } else {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
