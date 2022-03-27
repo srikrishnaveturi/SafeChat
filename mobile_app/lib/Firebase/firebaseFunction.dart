@@ -5,10 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class FireBaseFunction extends ChangeNotifier {
   bool blocked = false;
   Widget widget = Container();
   bool safeMode = true;
+  
   get getSafeMode {
     return safeMode;
   }
@@ -75,7 +78,7 @@ class FireBaseFunction extends ChangeNotifier {
           transaction.set(
             documentReference,
             {
-              'safeMode': [id]
+              'safeMode': []
             },
           );
         });
@@ -85,6 +88,7 @@ class FireBaseFunction extends ChangeNotifier {
 
   onSendMessage(String content, String id, String peerId,
       TextEditingController textEditingController, String groupChatId) {
+        
     if (content.trim() != '') {
       textEditingController.clear();
 

@@ -25,7 +25,7 @@ class _ChatRoomState extends State<ChatRoom> {
   List<String> decryptedMessages = [];
   late bool blockedStatus;
   Map<bool, String> map = {true: 'On', false: 'Off'};
-
+  
   late List<dynamic> safeModeList;
 
   String lastSeenDate(DateTime dateTime) {
@@ -129,13 +129,12 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   Color safeModeColor(List<dynamic> ids, String uid, String peerID) {
-    if ((ids.contains(uid) || ids.contains(peerID)) && ids.length == 1) {
-      return Colors.yellow;
-    } else if (ids.contains(uid) || ids.contains(peerID)) {
-      return Colors.red;
-    } else {
-      return Colors.green;
-    }
+   if(ids.contains(uid)){
+     return Colors.red;
+   }
+   else{
+     return Colors.green;
+   }
   }
 
   List<TextButton> getActions(bool second, BuildContext context, Widget content,
@@ -354,8 +353,8 @@ class _ChatRoomState extends State<ChatRoom> {
               style: TextButton.styleFrom(
                   padding: EdgeInsets.zero, minimumSize: Size(10.w, 10.h)),
               onPressed: () async {
-                //Provider.of<FireBaseFunction>(context, listen: false)
-                    //.updateSafeMode(data['chatID'], data['id'], safeModeList);
+                Provider.of<FireBaseFunction>(context, listen: false)
+                    .updateSafeMode(data['chatID'], data['id'], safeModeList);
               },
               child: StreamBuilder(
                 stream: FirebaseFirestore.instance
@@ -456,12 +455,11 @@ class _ChatRoomState extends State<ChatRoom> {
                                                               stateChange(() {
                                                                 pressed++;
                                                                 contentWidget =
-                                                                    Expanded(
-                                                                        child:
+                                                                   
                                                                             Center(
                                                                   child:
                                                                       CircularProgressIndicator(),
-                                                                ));
+                                                                );
                                                               });
                                                               if (pressed ==
                                                                   1) {
@@ -613,7 +611,8 @@ class _ChatRoomState extends State<ChatRoom> {
                           Fluttertoast.showToast(
                               msg: "You have blocked this contact");
                         } else {
-                          if (safeModeList.length > 0) {
+                          if (!safeModeList.contains(data['peerID'])) {
+                            
                             if (NLP.predict(textMessage.text,
                                     EmbeddingBuilder.embeddingData) >
                                 0.5) {
@@ -685,6 +684,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                     });
                                   });
                             } else {
+                              
                               Provider.of<FireBaseFunction>(context,
                                       listen: false)
                                   .onSendMessage(
@@ -697,6 +697,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                       data['chatID']);
                             }
                           } else {
+                            
                             Provider.of<FireBaseFunction>(context,
                                     listen: false)
                                 .onSendMessage(

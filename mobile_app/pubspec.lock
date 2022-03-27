@@ -78,6 +78,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  dart_sentiment:
+    dependency: "direct main"
+    description:
+      name: dart_sentiment
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.9"
   ffi:
     dependency: transitive
     description:
@@ -373,6 +380,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  remove_emoji:
+    dependency: transitive
+    description:
+      name: remove_emoji
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.7"
   shared_preferences:
     dependency: "direct main"
     description:
