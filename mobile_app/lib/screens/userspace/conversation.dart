@@ -112,7 +112,8 @@ class _ConversationState extends State<Conversation> {
                  'requestRecieved': conversations[index].get('requestRecieved'),
                  'requestAccepted': conversations[index].get('requestAccepted'),
                  'age':conversations[index].get('age'),
-                 'user_ID':conversations[index].get('user_ID')
+                 'user_ID':conversations[index].get('user_ID'),
+                 'yourAge':pref.getInt('age')
                 });
               },
             ),

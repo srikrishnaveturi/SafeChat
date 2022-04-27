@@ -124,13 +124,15 @@ class LoginScreenState extends State<LoginScreen> {
           await prefs?.setStringList('securedConvos', []);
           await prefs?.setString('DerivedBitsMap', json.encode({}));
           await prefs?.setString('image', '');
+          await prefs?.setInt('age', int.parse(age.text));
         } else {
           DocumentSnapshot documentSnapshot = documents[0];
           UserChat userChat = UserChat.fromDocument(documentSnapshot);
           // Write data to local
           await prefs?.setString('id', userChat.id);
           await prefs?.setString('name', userChat.name);
-          await prefs?.setString('blocked', '[]');
+          await prefs?.setInt('age', documentSnapshot.get('age'));
+          await prefs?.setString('publicKey', documentSnapshot.get('publicKey'));
         }
         Fluttertoast.showToast(msg: "Sign in success");
         this.setState(() {

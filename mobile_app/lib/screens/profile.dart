@@ -53,7 +53,10 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Profile'),
+          
           centerTitle: true,
+          
+         
         ),
         body: SafeArea(
           child: Container(

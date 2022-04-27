@@ -243,6 +243,12 @@ class ContactsPage extends SearchDelegate {
                                   'DerivedBits': dynamic2Uint8ListConvert(
                                       json.decode(pref.getString(
                                           'DerivedBitsMap')!)[finalString]),
+                                  'yourAge': pref.getInt('age'),
+                                  'age': suggestions[index].get('age'),
+                                  'requestRecieved':
+                                      suggestions[index].get('requestRecieved'),
+                                  'requestAccepted':
+                                      suggestions[index].get('requestAccepted'),
                                 });
                           }
                         },

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -51,11 +52,27 @@ class FireBaseFunction extends ChangeNotifier {
     return pref.getString('blockedStatus');
   }
 
+  void logOut(BuildContext context)async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    var privateKey = pref.getString('privateKey');
+    var securedConvos = pref.getStringList('securedConvos');
+    var derivedBits = pref.getString('DerivedBitsMap');
+    pref.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+
+    pref.setString('preivateKey', privateKey!);
+    pref.setStringList('securedConvos', securedConvos!);
+    pref.setString('DerivedBitsMap',derivedBits! );
+  }
+
   void updateSafeMode(String groupChatId, String id, List<dynamic> ids) {
+    String status = 'On';
     if (ids.contains(id)) {
       ids.remove(id);
+      status ='On';
     } else {
       ids.add(id);
+      status = 'Off';
     }
     FirebaseFirestore.instance
         .collection('messages')
@@ -63,6 +80,8 @@ class FireBaseFunction extends ChangeNotifier {
         .collection('Status')
         .doc('Status')
         .update({'safeMode': ids});
+
+        Fluttertoast.showToast(msg: "Safe Mode is $status");
   }
 
   setSafeMode(String groupChatId, String id) {
@@ -112,11 +131,14 @@ class FireBaseFunction extends ChangeNotifier {
     }
   }
 
-  updateProfile(String uid,String displayID, int age, String imageAsString){
+  updateProfile(String uid,String displayID, int age, String imageAsString)async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
     FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .update({'user_ID':displayID,'age':age,'image':imageAsString});
+
+        pref.setInt('age',age );
   }
 
   onBlockOrUnblock(

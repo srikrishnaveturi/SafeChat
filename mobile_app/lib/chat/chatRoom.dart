@@ -25,11 +25,10 @@ class _ChatRoomState extends State<ChatRoom> {
   List<String> decryptedMessages = [];
   late bool blockedStatus;
   Map<bool, String> map = {true: 'On', false: 'Off'};
-  
+
   late List<dynamic> safeModeList;
 
   String lastSeenDate(DateTime dateTime) {
-    
     if (DateTime.now().difference(dateTime).inDays >= 1) {
       return 'Last seen on ${DateFormat('dd-MM-yyyy').format(dateTime)}';
     }
@@ -129,12 +128,11 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   Color safeModeColor(List<dynamic> ids, String uid, String peerID) {
-   if(ids.contains(uid)){
-     return Colors.red;
-   }
-   else{
-     return Colors.green;
-   }
+    if (ids.contains(uid)) {
+      return Colors.red;
+    } else {
+      return Colors.green;
+    }
   }
 
   List<TextButton> getActions(bool second, BuildContext context, Widget content,
@@ -278,11 +276,12 @@ class _ChatRoomState extends State<ChatRoom> {
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (snapshot.hasData) {
                                 return Text(
-                                    snapshot
-                                        .data.docs[0]
-                                        .get('appStatus')=='Online'? 'Online':lastSeenDate(DateTime.parse(snapshot
-                                        .data.docs[0]
-                                        .get('appStatus'))),
+                                    snapshot.data.docs[0].get('appStatus') ==
+                                            'Online'
+                                        ? 'Online'
+                                        : lastSeenDate(DateTime.parse(snapshot
+                                            .data.docs[0]
+                                            .get('appStatus'))),
                                     style: TextStyle(fontSize: 8.sp));
                               } else {
                                 return Container();
@@ -349,34 +348,54 @@ class _ChatRoomState extends State<ChatRoom> {
           SizedBox(
             height: 0,
           ),
-          TextButton(
-              style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero, minimumSize: Size(10.w, 10.h)),
-              onPressed: () async {
-                Provider.of<FireBaseFunction>(context, listen: false)
-                    .updateSafeMode(data['chatID'], data['id'], safeModeList);
-              },
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('messages')
-                    .doc(data['chatID'])
-                    .collection('Status')
-                    .doc('Status')
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-                  if (snapshot.hasData) {
-                    safeModeList = snapshot.data!.get('safeMode');
-                    return Icon(
-                      Icons.health_and_safety_outlined,
-                      size: 7.w,
-                      color: safeModeColor(snapshot.data!.get('safeMode'),
-                          data['id'], data['peerID']),
-                    );
-                  } else {
-                    return CircularProgressIndicator();
-                  }
-                },
-              ))
+          data['yourAge'] >= 16
+              ? TextButton(
+                  style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero, minimumSize: Size(10.w, 10.h)),
+                  onPressed: () async {
+                    Provider.of<FireBaseFunction>(context, listen: false)
+                        .updateSafeMode(
+                            data['chatID'], data['id'], safeModeList);
+                  },
+                  child: StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('messages')
+                        .doc(data['chatID'])
+                        .collection('Status')
+                        .doc('Status')
+                        .snapshots(),
+                    builder:
+                        (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                      if (snapshot.hasData) {
+                        safeModeList = snapshot.data!.get('safeMode');
+                        return Icon(
+                          Icons.health_and_safety_outlined,
+                          size: 7.w,
+                          color: safeModeColor(snapshot.data!.get('safeMode'),
+                              data['id'], data['peerID']),
+                        );
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    },
+                  ))
+              : Container(
+                  child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('messages')
+                      .doc(data['chatID'])
+                      .collection('Status')
+                      .doc('Status')
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      safeModeList = snapshot.data!.get('safeMode');
+                      return Container();
+                    } else {
+                      return Container();
+                    }
+                  },
+                )),
         ],
       ),
       body: Container(
@@ -455,8 +474,7 @@ class _ChatRoomState extends State<ChatRoom> {
                                                               stateChange(() {
                                                                 pressed++;
                                                                 contentWidget =
-                                                                   
-                                                                            Center(
+                                                                    Center(
                                                                   child:
                                                                       CircularProgressIndicator(),
                                                                 );
@@ -611,8 +629,9 @@ class _ChatRoomState extends State<ChatRoom> {
                           Fluttertoast.showToast(
                               msg: "You have blocked this contact");
                         } else {
-                          if (!safeModeList.contains(data['peerID'])) {
-                            
+                         
+                          if (!safeModeList.contains(data['peerID']) ||
+                              data['age'] < 16) {
                             if (NLP.predict(textMessage.text,
                                     EmbeddingBuilder.embeddingData) >
                                 0.5) {
@@ -684,7 +703,6 @@ class _ChatRoomState extends State<ChatRoom> {
                                     });
                                   });
                             } else {
-                              
                               Provider.of<FireBaseFunction>(context,
                                       listen: false)
                                   .onSendMessage(
@@ -697,7 +715,6 @@ class _ChatRoomState extends State<ChatRoom> {
                                       data['chatID']);
                             }
                           } else {
-                            
                             Provider.of<FireBaseFunction>(context,
                                     listen: false)
                                 .onSendMessage(
